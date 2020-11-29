@@ -1,0 +1,99 @@
+html {
+  font-size: 10px;
+}
+
+h1 {
+  font-size: 3rem;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+	background-color: black;
+	color: white;
+	font-family: Helvetica, Arial;
+	font-size: 1.5rem;
+}
+
+.form-group {
+  padding-top: 10px;
+}
+
+.form-btn {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+  min-width: 100px;
+  height: 25px;
+  background-color: #666699;
+  border-radius: 25px;
+
+  font-family: SourceSansPro-SemiBold;
+  font-size: 1.5rem;
+  color: #fff;
+  line-height: 1.2;
+
+  -webkit-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+  transition: all 0.4s;
+
+  box-shadow: 0 10px 30px 0px rgba(189, 89, 212, 0.5);
+  -moz-box-shadow: 0 10px 30px 0px rgba(189, 89, 212, 0.5);
+  -webkit-box-shadow: 0 10px 30px 0px rgba(189, 89, 212, 0.5);
+  -o-box-shadow: 0 10px 30px 0px rgba(189, 89, 212, 0.5);
+  -ms-box-shadow: 0 10px 30px 0px rgba(189, 89, 212, 0.5);
+}
+
+
+.textarea {
+    display: block;
+    max-width: 100%;
+    min-width: 100%;
+    width: 750px; 
+    height: 150px;
+    padding: calc(.75em - 1px);
+    resize: vertical;
+}
+
+.red-text {
+   	color: red;
+	font-family: Helvetica, Arial;
+	font-size: 1.6rem;
+	width: 750px;
+	height: 150px;
+	overflow-y: scroll
+}
+
+.textarea.is-code {
+    font-family: Roboto Mono,Consolas,Courier New,monospace;
+    font-size: .9rem;
+    line-height: 1.45;
+    text-shadow: 0.015em 0.015em 0 #666;
+    color: #666;
+    padding: calc(.75rem - 1px);
+}
+
+.button.is-text {
+    height: auto;
+    padding: 0;
+    margin: 0;
+    line-height: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    color: #2980b9;
+    text-decoration: none;
+    vertical-align: inherit;
+    border-width: 0;
+}

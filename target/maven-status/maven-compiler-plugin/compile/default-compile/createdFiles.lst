@@ -1,0 +1,4 @@
+oas/api/validator/web/ServingWebContentApplication.class
+oas/api/validator/web/tools/OpenApiSpecifcationValidator.class
+oas/api/validator/web/model/OASResponse.class
+oas/api/validator/web/ValidationController.class

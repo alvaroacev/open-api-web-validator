@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+  <head>
+    <link rel="stylesheet" type="text/css" href="main.css">
+  </head>
+  <body>
+    <div>
+      <br>
+      <h1>OpenAPI Specification - Response Validator</h1>
+      <form accept-charset="UTF-8" action="#" th:action="@{/index}" th:object="${response}" method="post">
+        <div class="form-group">
+          <label class="text">API operation</label>
+          <input th:field="*{operation}" placeholder="Example: /status" required="required">
+        </div>
+        <div class="form-group">
+          <label for="method">Method</label>
+          <select th:field="*{method}" required="required">
+            <option value="GET">GET</option>
+            <option value="PATCH">PATCH</option>
+            <option value="PUT">PUT</option>
+            <option value="POST">POST</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="statusCode">Expected Status Code</label>
+<!--           <input type="text" th:field="*{statusCode}" required="required"> -->
+          <select th:field="*{statusCode}" required="required">
+            <option value="200">200</option>
+            <option value="201">201</option>
+            <option value="202">202</option>
+            <option value="204">204</option>
+            <option value="401">401</option>
+            <option value="403">403</option>
+            <option value="404">404</option>
+            <option value="405">405</option>
+            <option value="406">406</option>
+            <option value="407">407</option>
+            <option value="409">409</option>
+            <option value="410">410</option>
+            <option value="413">413</option>
+            <option value="415">415</option>
+            <option value="429">429</option>
+            <option value="500">500</option>
+            <option value="503">503</option>
+            <option value="504">504</option>
+          </select>
+        </div>
+        <br/>
+        <div class="form-group">
+          <label class="text">Paste your OpenAPI Specification</label>
+          <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5" required="required">></textarea>
+        </div>
+        <br/>
+        <div class="form-group">Paste your response here (in JSON format)</div>
+        <textarea th:field="*{response}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="{}" rows="5" required="required">></textarea>
+        <br/>
+        <button type="submit" class="form-btn">Submit</button>
+      </form>
+		<div th:if="${not #strings.isEmpty(response.validationReport)}">
+			<div th:if="${response.valid}">
+				<h3>Congratulations!</h3>
+				<p th:utext="${response.validationReport}" />	
+			</div>
+			<div th:unless="${response.valid}">
+				<h3>Oops, an error occurred!</h3>
+				<p class="red-text" th:utext="${response.validationReport}" />	
+			</div>
+		</div>
+    </div>
+  </body>
+</html>
