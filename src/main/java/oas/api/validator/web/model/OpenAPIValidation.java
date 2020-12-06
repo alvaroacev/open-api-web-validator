@@ -3,7 +3,7 @@ package oas.api.validator.web.model;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-public class OASResponse {
+public class OpenAPIValidation {
 
 	@NotNull(message = "Operation cannot be null")
 	private String operation;
@@ -17,9 +17,10 @@ public class OASResponse {
 	@NotNull(message = "API Specification cannot be null")
 	private String contract;
 	@NotNull(message = "Response cannot be null")
-	private String response;
+	private String payload;
 	private boolean isValid;
 	private String validationReport;
+	private String testType;
 	
 	public String getOperation() {
 		return operation;
@@ -45,11 +46,11 @@ public class OASResponse {
 	public void setContract(String contract) {
 		this.contract = contract;
 	}
-	public String getResponse() {
-		return response;
+	public String getPayload() {
+		return payload;
 	}
-	public void setResponse(String response) {
-		this.response = response;
+	public void setPayload(String payload) {
+		this.payload = payload;
 	}
 	public boolean isValid() {
 		return isValid;
@@ -63,10 +64,16 @@ public class OASResponse {
 	public void setValidationReport(String validationReport) {
 		this.validationReport = validationReport;
 	}
+	public String getTestType() {
+		return testType;
+	}
+	public void setTestType(String testType) {
+		this.testType = testType;
+	}
 	@Override
 	public String toString() {
 		return "OASResponse [operation=" + operation + ", method=" + method + ", statusCode=" + statusCode
-				+ ", contract=" + contract + ", response=" + response + ", isValid=" + isValid + ", validationErrors="
-				+ validationReport + "]";
+				+ ", contract=" + contract + ", payload=" + payload + ", isValid=" + isValid + ", validationReport="
+				+ validationReport + ", testType=" + testType + "]";
 	}
 }

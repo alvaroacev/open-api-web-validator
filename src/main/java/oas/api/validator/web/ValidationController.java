@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.atlassian.oai.validator.report.SimpleValidationReportFormat;
 import com.atlassian.oai.validator.report.ValidationReport;
 
-import oas.api.validator.web.model.OASResponse;
+import oas.api.validator.web.model.OpenAPIValidation;
 import oas.api.validator.web.tools.OpenApiSpecifcationValidator;
 
 @Controller
@@ -25,32 +25,42 @@ public class ValidationController  {
 
 	@GetMapping("/index")
 	public String indexForm(Model model) {
-		OASResponse response = new OASResponse();
-		model.addAttribute("response", response);
+		OpenAPIValidation validation = new OpenAPIValidation();
+		validation.setTestType("Response");
+		model.addAttribute("validation", validation);
 		return "index";
 	}
 
 	@PostMapping("/index")
-	public String validateForm(@ModelAttribute OASResponse response, Model model) {
-		logger.info("received a POST request to validate a response: {}", response);
-
-        ValidationReport validationReport = OpenApiSpecifcationValidator.validateResponse(response.getContract(), //
-        		response.getMethod(), //
-        		response.getOperation(), //
-        		response.getStatusCode(), //
-        		response.getResponse());
-
+	public String validateForm(@ModelAttribute OpenAPIValidation validation, Model model) {
+		logger.info("received a POST request to validate: {}", validation);
 		
-		if (!validationReport.hasErrors()) {
-			response.setValid(true);
-			response.setValidationReport(
-					"The response was successfully validated.");
+		ValidationReport validationReport = null;
+		
+		if(validation.getTestType().equals("Response")) {
+			validationReport = OpenApiSpecifcationValidator.validateResponse(validation.getContract(), //
+					validation.getMethod(), //
+					validation.getOperation(), //
+					validation.getStatusCode(), //
+					validation.getPayload());
 		} else {
-			response.setValid(false);
-			response.setValidationReport(
+			 validationReport = OpenApiSpecifcationValidator.validateRequest(validation.getContract(), //
+					validation.getMethod(), //
+					validation.getOperation(), //
+					null, null, //
+					validation.getPayload());
+		}
+
+		if (!validationReport.hasErrors()) {
+			validation.setValid(true);
+			validation.setValidationReport(
+					"The payload was successfully validated.");
+		} else {
+			validation.setValid(false);
+			validation.setValidationReport(
 					SimpleValidationReportFormat.getInstance().apply(validationReport));
 		}
-		model.addAttribute("response", response);
+		model.addAttribute("validation", validation);
 
 		return "index";
 	}
@@ -58,11 +68,11 @@ public class ValidationController  {
 	@ExceptionHandler(Exception.class)
 	public ModelAndView handleError(HttpServletRequest request, Exception ex) {
 		logger.error("Error when processing request: \n{}, error: \n{}", request, ex.getMessage());
-		OASResponse response = new OASResponse();
-		response.setValid(false);
-		response.setValidationReport(ex.getMessage());
+		OpenAPIValidation validation = new OpenAPIValidation();
+		validation.setValid(false);
+		validation.setValidationReport(ex.getMessage());
 		ModelAndView mav = new ModelAndView();
-		mav.addObject("response", response);
+		mav.addObject("validation", validation);
 		mav.setViewName("index");
 		return mav;
 	}

@@ -2,12 +2,28 @@
 <html xmlns:th="https://www.thymeleaf.org">
   <head>
     <link rel="stylesheet" type="text/css" href="main.css">
-  </head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script>
+		$(function() {
+			$('input[name="testType"]').on('click', function() {
+				if ($(this).val() == 'Response') {
+					$('#responseOnly').show();
+				} else {
+					$('#responseOnly').hide();
+				}
+			});
+		});
+	</script>
+</head>
   <body>
     <div>
       <br>
       <h1>OpenAPI Specification - Response Validator</h1>
-      <form accept-charset="UTF-8" action="#" th:action="@{/index}" th:object="${response}" method="post">
+      <form accept-charset="UTF-8" action="#" th:action="@{/index}" th:object="${validation}" method="post">
+      	<label class="text">What type of validation? </label>
+      	<input th:field="*{testType}" type="radio" value="Request" th:checked="${validation.testType == 'Request'}"> Request or
+		<input th:field="*{testType}" type="radio" value="Response" th:checked="${validation.testType == 'Response'}"> Response
+		<br/>
         <div class="form-group">
           <label class="text">API operation</label>
           <input th:field="*{operation}" placeholder="Example: /status" required="required">
@@ -21,10 +37,11 @@
             <option value="POST">POST</option>
           </select>
         </div>
-        <div class="form-group">
+        
+        <div id="responseOnly" class="form-group" style="display: inline">
+         <br/>
           <label for="statusCode">Expected Status Code</label>
-<!--           <input type="text" th:field="*{statusCode}" required="required"> -->
-          <select th:field="*{statusCode}" required="required">
+          <select th:field="*{statusCode}" required="required" style="display: inline">
             <option value="200">200</option>
             <option value="201">201</option>
             <option value="202">202</option>
@@ -47,23 +64,24 @@
         </div>
         <br/>
         <div class="form-group">
-          <label class="text">Paste your OpenAPI Specification</label>
-          <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5" required="required">></textarea>
+          <label class="text" >Paste your OpenAPI Specification</label>
+          <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5" required="required"></textarea>
         </div>
         <br/>
-        <div class="form-group">Paste your response here (in JSON format)</div>
-        <textarea th:field="*{response}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="{}" rows="5" required="required">></textarea>
+        <div class="form-group" style="display: block">Paste your request or response payload here (in JSON format)
+        	<textarea th:field="*{payload}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="{}"></textarea>
+        </div>
         <br/>
         <button type="submit" class="form-btn">Submit</button>
       </form>
-		<div th:if="${not #strings.isEmpty(response.validationReport)}">
-			<div th:if="${response.valid}">
+		<div th:if="${not #strings.isEmpty(validation.validationReport)}">
+			<div th:if="${validation.valid}">
 				<h3>Congratulations!</h3>
-				<p th:utext="${response.validationReport}" />	
+				<p th:utext="${validation.validationReport}" />	
 			</div>
-			<div th:unless="${response.valid}">
+			<div th:unless="${validation.valid}">
 				<h3>Oops, an error occurred!</h3>
-				<p class="red-text" th:utext="${response.validationReport}" />	
+				<p class="red-text" th:utext="${validation.validationReport}" />	
 			</div>
 		</div>
     </div>
