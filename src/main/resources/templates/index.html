@@ -8,8 +8,10 @@
 			$('input[name="testType"]').on('click', function() {
 				if ($(this).val() == 'Response') {
 					$('#responseOnly').show();
+					$('#requestOnly').hide();
 				} else {
 					$('#responseOnly').hide();
+					$('#requestOnly').show();
 				}
 			});
 		});
@@ -26,7 +28,7 @@
 		<br/>
         <div class="form-group">
           <label class="text">API operation</label>
-          <input th:field="*{operation}" placeholder="Example: /status" required="required">
+          <input th:field="*{operation}" placeholder="example: /status" required="required">
         </div>
         <div class="form-group">
           <label for="method">Method</label>
@@ -61,14 +63,23 @@
             <option value="503">503</option>
             <option value="504">504</option>
           </select>
+          <label class="text">(only needed for response validations)</label>
         </div>
-        <br/>
+		<div id="requestOnly" class="form-group" style="display: none">
+			<br /> 
+			<label class="text">HTTP Headers</label> 
+			<input th:field="*{headers}"
+				placeholder="example: headerName1:value1,headerName2:value2"
+				class="input-text"> 
+			<label class="text">(may be needed for request validations)</label>
+		</div>
+		<br/>
         <div class="form-group">
-          <label class="text" >Paste your OpenAPI Specification</label>
+          <label class="text" >Paste here your OpenAPI Specification</label>
           <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5" required="required"></textarea>
         </div>
         <br/>
-        <div class="form-group" style="display: block">Paste your request or response payload here (in JSON format)
+        <div class="form-group" style="display: block">Paste here your request or response payload here (in JSON format)
         	<textarea th:field="*{payload}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="{}"></textarea>
         </div>
         <br/>

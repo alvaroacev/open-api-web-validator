@@ -133,7 +133,7 @@ public class OpenApiSpecifcationValidator {
      */
     private static ValidationReport validateRequest(OpenApiInteractionValidator openApiInteractionValidator, Request.Method verb, String path, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
         final Request request = buildRequest(verb, path, queryParameters, requestHeaders, requestBody);
-        logger.info("request: {}", request);
+        logger.debug("request: {}", request);
 
         final ValidationReport validationReport = openApiInteractionValidator.validateRequest(request);
         if (validationReport.hasErrors()) {

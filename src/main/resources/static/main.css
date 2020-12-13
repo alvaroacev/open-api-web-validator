@@ -56,6 +56,9 @@ body {
   -ms-box-shadow: 0 10px 30px 0px rgba(189, 89, 212, 0.5);
 }
 
+.input-text {
+    width: 330px; 
+}
 
 .textarea {
     display: block;

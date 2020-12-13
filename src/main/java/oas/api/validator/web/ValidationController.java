@@ -1,5 +1,10 @@
 package oas.api.validator.web;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -19,8 +24,8 @@ import oas.api.validator.web.model.OpenAPIValidation;
 import oas.api.validator.web.tools.OpenApiSpecifcationValidator;
 
 @Controller
-public class ValidationController  {
-	
+public class ValidationController {
+
 	private static final Logger logger = LoggerFactory.getLogger(OpenApiSpecifcationValidator.class);
 
 	@GetMapping("/index")
@@ -33,38 +38,44 @@ public class ValidationController  {
 
 	@PostMapping("/index")
 	public String validateForm(@ModelAttribute OpenAPIValidation validation, Model model) {
-		logger.info("received a POST request to validate: {}", validation);
-		
+		logger.debug("received a POST request to validate: {}", validation);
+
 		ValidationReport validationReport = null;
-		
-		if(validation.getTestType().equals("Response")) {
+
+		if (validation.getTestType().equals("Response")) {
 			validationReport = OpenApiSpecifcationValidator.validateResponse(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
 					validation.getStatusCode(), //
 					validation.getPayload());
 		} else {
-			 validationReport = OpenApiSpecifcationValidator.validateRequest(validation.getContract(), //
+			final Map<String, String> requestHeaders = new HashMap<>();
+			if (!validation.getHeaders().isEmpty()) {
+				requestHeaders.putAll(Arrays.stream(validation.getHeaders().split(",")) //
+						.map(i -> i.split(":")) //
+						.collect(Collectors.toMap(a -> a[0], a -> a[1])));
+				logger.info("headers: {}", requestHeaders);
+			}
+			
+			validationReport = OpenApiSpecifcationValidator.validateRequest(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
-					null, null, //
+					null, requestHeaders, //
 					validation.getPayload());
 		}
 
 		if (!validationReport.hasErrors()) {
 			validation.setValid(true);
-			validation.setValidationReport(
-					"The payload was successfully validated.");
+			validation.setValidationReport("The payload was successfully validated.");
 		} else {
 			validation.setValid(false);
-			validation.setValidationReport(
-					SimpleValidationReportFormat.getInstance().apply(validationReport));
+			validation.setValidationReport(SimpleValidationReportFormat.getInstance().apply(validationReport));
 		}
 		model.addAttribute("validation", validation);
 
 		return "index";
 	}
-	
+
 	@ExceptionHandler(Exception.class)
 	public ModelAndView handleError(HttpServletRequest request, Exception ex) {
 		logger.error("Error when processing request: \n{}, error: \n{}", request, ex.getMessage());
