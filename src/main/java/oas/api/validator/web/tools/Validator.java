@@ -13,13 +13,13 @@ import com.atlassian.oai.validator.model.SimpleResponse;
 import com.atlassian.oai.validator.report.SimpleValidationReportFormat;
 import com.atlassian.oai.validator.report.ValidationReport;
 
-public class OpenApiSpecifcationValidator {
+public class Validator {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpenApiSpecifcationValidator.class);
+    private static final Logger logger = LoggerFactory.getLogger(Validator.class);
 
     private static final String APPLICATION_JSON = "application/json";
 
-    private OpenApiSpecifcationValidator() {}
+    private Validator() {}
 
 
     /**
@@ -35,6 +35,7 @@ public class OpenApiSpecifcationValidator {
             case 201: // Created
             case 202: // Accepted
             case 204: // No Content
+            case 303: // See Other
             case 400: // Bad Request
             case 401: // Unauthorized
             case 403: // Forbidden
@@ -48,6 +49,7 @@ public class OpenApiSpecifcationValidator {
             case 415: // Unsupported Media Type
             case 429: // Too Many Requests
             case 500: // Internal Server Error
+            case 502: // Bad Gateway
             case 503: // Service Unavailable
             case 504: // Gateway Timeout
                 builder = SimpleResponse.Builder.status(statusCode);

@@ -21,12 +21,12 @@ import com.atlassian.oai.validator.report.SimpleValidationReportFormat;
 import com.atlassian.oai.validator.report.ValidationReport;
 
 import oas.api.validator.web.model.OpenAPIValidation;
-import oas.api.validator.web.tools.OpenApiSpecifcationValidator;
+import oas.api.validator.web.tools.Validator;
 
 @Controller
 public class ValidationController {
 
-	private static final Logger logger = LoggerFactory.getLogger(OpenApiSpecifcationValidator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValidationController.class);
 
 	@GetMapping("/index")
 	public String indexForm(Model model) {
@@ -43,7 +43,7 @@ public class ValidationController {
 		ValidationReport validationReport = null;
 
 		if (validation.getTestType().equals("Response")) {
-			validationReport = OpenApiSpecifcationValidator.validateResponse(validation.getContract(), //
+			validationReport = Validator.validateResponse(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
 					validation.getStatusCode(), //
@@ -57,7 +57,7 @@ public class ValidationController {
 				logger.info("headers: {}", requestHeaders);
 			}
 			
-			validationReport = OpenApiSpecifcationValidator.validateRequest(validation.getContract(), //
+			validationReport = Validator.validateRequest(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
 					null, requestHeaders, //
