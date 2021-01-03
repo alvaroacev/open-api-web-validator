@@ -142,6 +142,8 @@ public class OpenApiValidator {
 					logger.warn("No example was found on component {}", componentName);
 				}
 			}
+		} else {
+			logger.warn("MediaType {} was not found", APPLICATION_JSON);
 		}
 		return examples;
 	}

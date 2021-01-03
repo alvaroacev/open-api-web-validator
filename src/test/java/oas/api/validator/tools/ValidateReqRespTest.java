@@ -14,7 +14,7 @@ class ValidateReqRespTest {
 	void testValidateExamplesErrorResponse() {
 		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/petstore-with-errors.yaml");
 		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
-		assertTrue(!validateExamples.isEmpty());
+		assertTrue(validateExamples.contains("ERROR"));
 	}
 	
 	@Test

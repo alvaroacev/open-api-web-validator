@@ -101,13 +101,13 @@
 		<div th:if="${not #strings.isEmpty(validation.validationReport)}">
 			<div th:if="${validation.valid}">
 				<h3>Congratulations!</h3>
-				<p th:utext="${validation.validationReport}" />	
+				<p class="textarea" th:utext="${validation.validationReport}" />
 			</div>
 			<div th:unless="${validation.valid}">
 				<h3>Oops, an error occurred!</h3>
-				<p class="red-text" th:utext="${validation.validationReport}" />	
+				<p class="red-text" th:utext="${validation.validationReport}" />
 			</div>
 		</div>
-    </div>
+	</div>
   </body>
 </html>

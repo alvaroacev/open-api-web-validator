@@ -51,13 +51,18 @@ public class ValidateReqResp {
 	 */
 	public static String validateExamples(String openAPISpec) {
 		final StringBuilder b = new StringBuilder();
+		final StringBuilder successReport = new StringBuilder();
 		final OpenAPI api = OpenApiValidator.loadApiFromString(openAPISpec);
 		logger.info("OpenAPI Specification {} - {}", api.getInfo().getVersion());
 		final OpenApiInteractionValidator openApiInteractionValidator = new Builder().withApi(api).build();
 		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
 			endpoint.getExamples().forEach((examplesKey, value) -> {
-				logger.info("On path {} and HTTP method {}, {} response tests were found", endpoint.getPath(), examplesKey, value.size());
+				successReport.append('\n').append("On path ").append(endpoint.getPath()).append("and HTTP method ")
+						.append(examplesKey).append(", ").append(value.size()).append(" response tests were found");
+				logger.debug("On path {} and HTTP method {}, {} response tests were found", endpoint.getPath(), examplesKey, value.size());
 				value.forEach(example -> {
+					logger.info("Validate example response with verb {}, endpoint: {}, status: {},  name: {}",
+							examplesKey, endpoint.getPath(), example.getStatusCode(), example.getName());
 					final ValidationReport validationReport = validateResponse(openApiInteractionValidator,
 							getVerbFromVerbString(examplesKey), endpoint.getPath(),
 							new Integer(example.getStatusCode()).toString(), example.getPayload());
@@ -74,6 +79,7 @@ public class ValidateReqResp {
 			b.append("All examples (response only) were succesfully validated for OpenAPI Specification: ") //
 			.append(api.getInfo().getTitle()).append(" and version: ") //
 			.append(api.getInfo().getVersion());
+			b.append(successReport);
 		}
 		return b.toString();
 	}
