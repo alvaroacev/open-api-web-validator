@@ -6,7 +6,7 @@ public class OpenAPIValidation {
 	//TODO create enumeration
 	private String method;
 	//TODO create enumeration
-	private int statusCode;
+	private String statusCode;
 	private String contract;
 	private String payload;
 	private boolean isValid;
@@ -26,10 +26,10 @@ public class OpenAPIValidation {
 	public void setMethod(String method) {
 		this.method = method;
 	}
-	public int getStatusCode() {
+	public String getStatusCode() {
 		return statusCode;
 	}
-	public void setStatusCode(int statusCode) {
+	public void setStatusCode(String statusCode) {
 		this.statusCode = statusCode;
 	}
 	public String getContract() {

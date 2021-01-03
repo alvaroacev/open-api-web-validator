@@ -7,11 +7,23 @@
 		$(function() {
 			$('input[name="testType"]').on('click', function() {
 				if ($(this).val() == 'Response') {
-					$('#responseOnly').show();
-					$('#requestOnly').hide();
-				} else {
-					$('#responseOnly').hide();
-					$('#requestOnly').show();
+					$('#apiOperation').show();
+					$('#apiMethod').show();
+					$('#apiPayload').show();
+					$('#apiStatusCode').show();
+					$('#apiHeaders').hide();
+				} else if ($(this).val() == 'Request') {
+					$('#apiOperation').show();
+					$('#apiMethod').show();
+					$('#apiPayload').show();
+					$('#apiStatusCode').hide();
+					$('#apiHeaders').show();
+				} else if ($(this).val() == 'Examples') {
+					$('#apiOperation').hide();
+					$('#apiMethod').hide();
+					$('#apiPayload').hide();
+					$('#apiStatusCode').hide();
+					$('#apiHeaders').hide();
 				}
 			});
 		});
@@ -23,16 +35,17 @@
       <h1>OpenAPI Specification - Response Validator</h1>
       <form accept-charset="UTF-8" action="#" th:action="@{/index}" th:object="${validation}" method="post">
       	<label class="text">What type of validation? </label>
-      	<input th:field="*{testType}" type="radio" value="Request" th:checked="${validation.testType == 'Request'}"> Request or
+      	<input th:field="*{testType}" type="radio" value="Request" th:checked="${validation.testType == 'Request'}"> Request
 		<input th:field="*{testType}" type="radio" value="Response" th:checked="${validation.testType == 'Response'}"> Response
+		<input th:field="*{testType}" type="radio" value="Examples" th:checked="${validation.testType == 'Examples'}"> All OAS examples
 		<br/>
-        <div class="form-group">
+        <div id="apiOperation" class="form-group" style="display: block">
           <label class="text">API operation</label>
-          <input th:field="*{operation}" placeholder="example: /status" required="required">
+          <input th:field="*{operation}" placeholder="example: /status">
         </div>
-        <div class="form-group">
+        <div id="apiMethod" class="form-group" style="display: block">
           <label for="method">Method</label>
-          <select th:field="*{method}" required="required">
+          <select th:field="*{method}">
             <option value="GET">GET</option>
             <option value="PATCH">PATCH</option>
             <option value="PUT">PUT</option>
@@ -40,10 +53,10 @@
           </select>
         </div>
         
-        <div id="responseOnly" class="form-group" style="display: inline">
+        <div id="apiStatusCode" class="form-group" style="display: block">
          <br/>
           <label for="statusCode">Expected Status Code</label>
-          <select th:field="*{statusCode}" required="required" style="display: inline">
+          <select th:field="*{statusCode}" style="display: inline">
             <option value="200">200</option>
             <option value="201">201</option>
             <option value="202">202</option>
@@ -65,7 +78,7 @@
           </select>
           <label class="text">(only needed for response validations)</label>
         </div>
-		<div id="requestOnly" class="form-group" style="display: none">
+		<div id="apiHeaders" class="form-group" style="display: none">
 			<br /> 
 			<label class="text">HTTP Headers</label> 
 			<input th:field="*{headers}"
@@ -75,11 +88,11 @@
 		</div>
 		<br/>
         <div class="form-group">
-          <label class="text" >Paste here your OpenAPI Specification</label>
-          <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5" required="required"></textarea>
+          <label class="text">Paste here your OpenAPI Specification</label>
+          <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5"></textarea>
         </div>
         <br/>
-        <div class="form-group" style="display: block">Paste here your request or response payload here (in JSON format)
+        <div id="apiPayload" class="form-group" style="display: block">Paste here your request or response payload here (in JSON format)
         	<textarea th:field="*{payload}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="{}"></textarea>
         </div>
         <br/>

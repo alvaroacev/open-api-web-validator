@@ -17,11 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.atlassian.oai.validator.report.SimpleValidationReportFormat;
-import com.atlassian.oai.validator.report.ValidationReport;
-
+import oas.api.validator.tools.ValidateReqResp;
 import oas.api.validator.web.model.OpenAPIValidation;
-import oas.api.validator.web.tools.Validator;
 
 @Controller
 public class ValidationController {
@@ -38,17 +35,32 @@ public class ValidationController {
 
 	@PostMapping("/index")
 	public String validateForm(@ModelAttribute OpenAPIValidation validation, Model model) {
-		logger.debug("received a POST request to validate: {}", validation);
+		logger.debug("received a request to validate: {}", validation);
 
-		ValidationReport validationReport = null;
+		String validationReport = new String();
 
-		if (validation.getTestType().equals("Response")) {
-			validationReport = Validator.validateResponse(validation.getContract(), //
+		switch (validation.getTestType()) {
+		case "Examples":
+			validationReport = ValidateReqResp.validateExamples(validation.getContract());
+			validation.setValid(!validationReport.contains("ERROR"));
+			validation.setValidationReport(validationReport);
+			logger.info("Resuls of the example validations: {}", validation);
+			break;
+		case "Response":
+			validationReport = ValidateReqResp.validateResponse(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
 					validation.getStatusCode(), //
 					validation.getPayload());
-		} else {
+			if (validationReport.isEmpty()) {
+				validation.setValid(true);
+				validation.setValidationReport("The response payload was successfully validated.");
+			} else {
+				validation.setValid(false);
+				validation.setValidationReport(validationReport);
+			}
+			break;
+		case "Request":
 			final Map<String, String> requestHeaders = new HashMap<>();
 			if (!validation.getHeaders().isEmpty()) {
 				requestHeaders.putAll(Arrays.stream(validation.getHeaders().split(",")) //
@@ -57,19 +69,25 @@ public class ValidationController {
 				logger.info("headers: {}", requestHeaders);
 			}
 			
-			validationReport = Validator.validateRequest(validation.getContract(), //
+			validationReport = ValidateReqResp.validateRequest(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
 					null, requestHeaders, //
 					validation.getPayload());
-		}
-
-		if (!validationReport.hasErrors()) {
-			validation.setValid(true);
-			validation.setValidationReport("The payload was successfully validated.");
-		} else {
+			if (validationReport.isEmpty()) {
+				validation.setValid(true);
+				validation.setValidationReport("The request payload was successfully validated.");
+			} else {
+				validation.setValid(false);
+				validation.setValidationReport(validationReport);
+			}
+			break;
+		default:
+			String format = "Validation type " + validation.getTestType() + " is not supported";
+			logger.warn(format);
 			validation.setValid(false);
-			validation.setValidationReport(SimpleValidationReportFormat.getInstance().apply(validationReport));
+			validation.setValidationReport(format);
+			break;
 		}
 		model.addAttribute("validation", validation);
 
