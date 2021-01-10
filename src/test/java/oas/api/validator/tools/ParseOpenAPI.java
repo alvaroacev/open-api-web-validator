@@ -3,7 +3,6 @@ package oas.api.validator.tools;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.core.models.AuthorizationValue;
 import oas.api.validator.model.OpenAPIExamples;
-import oas.api.validator.tools.OpenApiValidator;
 
 public class ParseOpenAPI {
 
@@ -23,7 +20,7 @@ public class ParseOpenAPI {
 	@Test
 	public void testOnlyGetAPI() {
 		final String oasPath = "openapi-specs/petstore.yaml";
-		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath, new ArrayList<AuthorizationValue>());
+		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath);
 		assertNotNull(openApi);
 		logger.info("API Title: {} - version: {} ", openApi.getInfo().getTitle(), openApi.getInfo().getVersion());
 		OpenApiValidator.printResults(openApi);
@@ -32,7 +29,7 @@ public class ParseOpenAPI {
 	@Test
 	public void testCompleteAPI() {
 		final String oasPath = "openapi-specs/petstore-multi-operations.yaml";
-		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath, new ArrayList<AuthorizationValue>());
+		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath);
 		assertNotNull(openApi);
 		logger.info("API Title: {} - version: {} ", openApi.getInfo().getTitle(), openApi.getInfo().getVersion());
 		List<OpenAPIExamples> openAPIExamples = OpenApiValidator.printResults(openApi);
@@ -44,7 +41,7 @@ public class ParseOpenAPI {
 	@Test
 	public void testPetsPOST() {
 		final String oasPath = "openapi-specs/petstore-multi-operations.yaml";
-		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath, new ArrayList<AuthorizationValue>());
+		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath);
 		assertNotNull(openApi);
 		logger.info("API Title: {} - version: {} ", openApi.getInfo().getTitle(), openApi.getInfo().getVersion());
 		List<OpenAPIExamples> openAPIExamples = OpenApiValidator.printResults(openApi);
@@ -56,7 +53,7 @@ public class ParseOpenAPI {
 	@Test
 	public void testPetsPUT() {
 		final String oasPath = "openapi-specs/petstore-multi-operations.yaml";
-		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath, new ArrayList<AuthorizationValue>());
+		OpenAPI openApi = OpenApiValidator.loadApiFromLocation(oasPath);
 		assertNotNull(openApi);
 		logger.info("API Title: {} - version: {} ", openApi.getInfo().getTitle(), openApi.getInfo().getVersion());
 		List<OpenAPIExamples> openAPIExamples = OpenApiValidator.printResults(openApi);

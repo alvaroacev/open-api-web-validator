@@ -42,7 +42,7 @@ paths:
                     - id: 2
                       name: Doggy
                 Peggy:
-                  $ref: '#/components/examples/Peggy'
+                  $ref: '#/components/examples/Peggies'
         default:
           description: unexpected error
           content:
@@ -211,8 +211,13 @@ components:
         message:
           type: string
   examples:
-    Peggy:
+    Peggies:
       value:
         - id: 1
           name: Peggy
-          tag: Pug
+          tag: Pug    
+    Peggy:
+      value:
+        id: 1
+        name: Peggy
+        tag: Pug

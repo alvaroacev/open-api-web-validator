@@ -32,7 +32,7 @@
   <body>
     <div>
       <br>
-      <h1>OpenAPI Specification - Response Validator</h1>
+      <h1>OpenAPI Specification - Validator</h1>
       <form accept-charset="UTF-8" action="#" th:action="@{/index}" th:object="${validation}" method="post">
       	<label class="text">What type of validation? </label>
       	<input th:field="*{testType}" type="radio" value="Request" th:checked="${validation.testType == 'Request'}"> Request

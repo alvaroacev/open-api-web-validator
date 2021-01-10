@@ -2,7 +2,6 @@ package oas.api.validator;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.core.models.AuthorizationValue;
 import oas.api.validator.tools.OpenApiValidator;
 
 public class ValidateExamples {
@@ -44,7 +42,7 @@ public class ValidateExamples {
 				return;
 			}
 			try {
-				OpenAPI openApi = OpenApiValidator.loadApiFromLocation(openAPIFile, new ArrayList<AuthorizationValue>());
+				OpenAPI openApi = OpenApiValidator.loadApiFromLocation(openAPIFile);
 				logger.info("API Title: {} - version: {} ", openApi.getInfo().getTitle(),
 						openApi.getInfo().getVersion());
 				OpenApiValidator.printResults(openApi);

@@ -1,5 +1,6 @@
 package oas.api.validator.tools;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -33,11 +34,11 @@ public class ValidateReqResp {
      * @param responseBody The HTTP response body.
      * @return String containing a validation error report, empty otherwise
      */
-	public static String validateResponse(String openAPISpec, String verbString, String path, String statusCode, String responseBody) {
+	public static String validateResponse(String openAPISpec, String verbString, String path, Map<String, String> responseHeaders, String statusCode, String responseBody) {
 		String response = new String();
 		final OpenApiInteractionValidator openApiInteractionValidator = OpenApiInteractionValidator.createForInlineApiSpecification(openAPISpec).build();
 		final Request.Method verb = getVerbFromVerbString(verbString);
-		final ValidationReport validateResponse = validateResponse(openApiInteractionValidator, verb, path, statusCode, responseBody);
+		final ValidationReport validateResponse = validateResponse(openApiInteractionValidator, verb, path, responseHeaders, statusCode, responseBody);
 		if (validateResponse.hasErrors()) {
 			response = SimpleValidationReportFormat.getInstance().apply(validateResponse);
 		}
@@ -54,7 +55,7 @@ public class ValidateReqResp {
 		final StringBuilder successReport = new StringBuilder();
 		final OpenAPI api = OpenApiValidator.loadApiFromString(openAPISpec);
 		logger.info("OpenAPI Specification {} - {}", api.getInfo().getVersion());
-		final OpenApiInteractionValidator openApiInteractionValidator = new Builder().withApi(api).build();
+		final OpenApiInteractionValidator openApiInteractionValidator = new Builder().withInlineApiSpecification(openAPISpec).build();
 		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
 			endpoint.getExamples().forEach((examplesKey, value) -> {
 				successReport.append('\n').append("On path ").append(endpoint.getPath()).append("and HTTP method ")
@@ -64,7 +65,7 @@ public class ValidateReqResp {
 					logger.info("Validate example response with verb {}, endpoint: {}, status: {},  name: {}",
 							examplesKey, endpoint.getPath(), example.getStatusCode(), example.getName());
 					final ValidationReport validationReport = validateResponse(openApiInteractionValidator,
-							getVerbFromVerbString(examplesKey), endpoint.getPath(),
+							getVerbFromVerbString(examplesKey), endpoint.getPath(), new HashMap<String, String>(),
 							new Integer(example.getStatusCode()).toString(), example.getPayload());
 					if (validationReport.hasErrors()) {
 						final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
@@ -105,8 +106,8 @@ public class ValidateReqResp {
 		return response;
     }
     
-	private static ValidationReport validateResponse(OpenApiInteractionValidator openApiInteractionValidator, Request.Method verb, String path, String statusCode, String responseBody) {
-		final Response response = buildResponse(statusCode, responseBody);
+	private static ValidationReport validateResponse(OpenApiInteractionValidator openApiInteractionValidator, Request.Method verb, String path, Map<String, String> responseHeaders, String statusCode, String responseBody) {
+		final Response response = buildResponse(statusCode, responseBody, responseHeaders);
 		logger.debug("Response: {}", response);
 		final ValidationReport validationReport = openApiInteractionValidator.validateResponse(path, verb, response);
 		return validationReport;
@@ -118,7 +119,7 @@ public class ValidateReqResp {
      * @param responseBody The HTTP response body.
      * @return The HTTP response.
      */
-    private static Response buildResponse(String statusCode, String responseBody ) {
+    private static Response buildResponse(String statusCode, String responseBody, Map<String, String> responseHeaders) {
         Integer buildStatusCode = OpenApiValidator.buildStatusCode(statusCode);
         if(buildStatusCode == null) {
         	return null;
@@ -127,6 +128,9 @@ public class ValidateReqResp {
         
         if (responseBody != null) {
             builder.withContentType(APPLICATION_JSON).withBody(responseBody);
+        }
+        if (responseHeaders != null) {
+        	responseHeaders.forEach(builder::withHeader);
         }
         return builder.build();
     }

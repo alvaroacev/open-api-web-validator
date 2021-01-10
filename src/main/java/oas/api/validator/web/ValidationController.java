@@ -43,13 +43,22 @@ public class ValidationController {
 		case "Examples":
 			validationReport = ValidateReqResp.validateExamples(validation.getContract());
 			validation.setValid(!validationReport.contains("ERROR"));
-			validation.setValidationReport(validationReport);
+			validation.setValidationReport(validationReport.replaceAll("\n", "<br>"));
 			logger.info("Resuls of the example validations: {}", validation);
 			break;
+
 		case "Response":
+			final Map<String, String> responseHeaders = new HashMap<>();
+			if (validation.getHeaders() == null || !validation.getHeaders().isEmpty()) {
+				responseHeaders.putAll(Arrays.stream(validation.getHeaders().split(",")) //
+						.map(i -> i.split(":")) //
+						.collect(Collectors.toMap(a -> a[0], a -> a[1])));
+				logger.info("headers: {}", responseHeaders);
+			}
 			validationReport = ValidateReqResp.validateResponse(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
+					responseHeaders,
 					validation.getStatusCode(), //
 					validation.getPayload());
 			if (validationReport.isEmpty()) {
@@ -60,9 +69,10 @@ public class ValidationController {
 				validation.setValidationReport(validationReport);
 			}
 			break;
+			
 		case "Request":
 			final Map<String, String> requestHeaders = new HashMap<>();
-			if (!validation.getHeaders().isEmpty()) {
+			if (validation.getHeaders() == null || !validation.getHeaders().isEmpty()) {
 				requestHeaders.putAll(Arrays.stream(validation.getHeaders().split(",")) //
 						.map(i -> i.split(":")) //
 						.collect(Collectors.toMap(a -> a[0], a -> a[1])));
@@ -82,6 +92,7 @@ public class ValidationController {
 				validation.setValidationReport(validationReport);
 			}
 			break;
+			
 		default:
 			String format = "Validation type " + validation.getTestType() + " is not supported";
 			logger.warn(format);

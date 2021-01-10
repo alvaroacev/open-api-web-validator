@@ -196,9 +196,8 @@ public class OpenApiValidator {
 	 * @param authData   Authentication data for reading the specification.
 	 * @return the loaded and prepared {@link OpenAPI}
 	 */
-	//TODO remove authData param - not used
-	public static OpenAPI loadApiFromLocation(@Nonnull final String oasPath, @Nonnull final List<AuthorizationValue> authData) {
-		final SwaggerParseResult parseResult = new OpenAPIParser().readLocation(oasPath, authData, new ParseOptions());
+	public static OpenAPI loadApiFromLocation(@Nonnull final String oasPath) {
+		final SwaggerParseResult parseResult = new OpenAPIParser().readLocation(oasPath, new ArrayList<AuthorizationValue>(), new ParseOptions());
 		if (parseResult == null || parseResult.getOpenAPI() == null
 				|| (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty())) {
 			throw new IllegalArgumentException(
