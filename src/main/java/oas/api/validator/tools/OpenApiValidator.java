@@ -50,10 +50,7 @@ public class OpenApiValidator {
 
 	public static List<OpenAPIExamples> parseExamples(OpenAPI openApi) {
 		List<OpenAPIExamples> openAPIExamples = new ArrayList<>();
-		if (openApi.getComponents().getExamples() == null) {
-			logger.warn("OpenAPI Specification {} - {} has not defined any example", openApi.getInfo().getTitle(), openApi.getInfo().getVersion());
-			return openAPIExamples;
-		}
+
 		openApi.getPaths().forEach((key, value) -> {
 			final OpenAPIExamples api = new OpenAPIExamples();
 			api.setPath(key);

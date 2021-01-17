@@ -61,4 +61,5 @@ public class ParseOpenAPI {
 		assertTrue(result.isPresent());
 		assertTrue(result.get().getExamples().get("PUT").size() == 1);
 	}
+	
 }

@@ -3,7 +3,6 @@ package oas.api.validator.tools;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashMap;
 
@@ -48,12 +47,15 @@ class ValidateReqRespTest {
 		final String responseBody = "{\"id\":0,\"name\":1,\"tag\":\"string\"}";
 		final String report = ValidateReqResp.validateResponse(apiContent, "GET", "/pets/{id}",
 				new HashMap<String, String>(), "200", responseBody);
-		assertTrue(report.contains("[ERROR]"));
+		assertTrue(report.contains("[ERROR]")); 
 	}
 
-	@Ignore
-	void testValidateRequest() {
-		fail("Not yet implemented");
+
+	@Ignore //TODO issue reported by issue #314 - https://bitbucket.org/atlassian/swagger-request-validator 
+	public void testDefinedOnResponse() {
+		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/oneOf-defined-on-schema.yaml");
+		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
+		assertFalse(validateExamples.contains("ERROR")); 
 	}
 
 }

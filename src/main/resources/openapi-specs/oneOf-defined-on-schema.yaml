@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Polymorphism with oneOf in OAS
+  version: '1.0'
+  description: 'Exmaple to desmonstrate the usage polymorphism using oneOf in OAS.'
+paths:
+  /solicitors:
+    post:
+      summary: ''
+      operationId: post-solicitors
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Legal'
+              examples:
+                example-1:
+                  value:
+                    id: 1
+                    solicitor: My solicitor
+                    address: 
+                      street: Mark Lane 55
+                      postal_code: NE1 3DQ
+                example-2:
+                  value:
+                    id: 0
+                    solicitor: string
+                    address: 
+                      email: support@yahoo.com
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Legal'
+        description: ''
+      description: Create a collateral
+components:
+  schemas:
+    Legal:
+      title: Legal
+      type: object
+      properties:
+        id:
+          type: integer
+        solicitor:
+          type: string
+        address:
+          oneOf:
+            - properties:
+                street:
+                  type: string
+                postal_code:
+                  type: string
+              required:
+                - street
+            - properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+          type: object
+      required:
+        - id
