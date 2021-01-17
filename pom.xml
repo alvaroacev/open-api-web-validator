@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>oas.api.validator</groupId>
 	<artifactId>open-api-web-validator</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>open-api-web-validator</name>
 	<description>OpenAPI Specification - Response Validator</description>
 

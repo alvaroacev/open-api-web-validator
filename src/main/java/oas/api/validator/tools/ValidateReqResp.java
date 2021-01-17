@@ -1,7 +1,6 @@
 package oas.api.validator.tools;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ import com.atlassian.oai.validator.report.SimpleValidationReportFormat;
 import com.atlassian.oai.validator.report.ValidationReport;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import oas.api.validator.model.OpenAPIExamples;
 
 public class ValidateReqResp {
 
@@ -57,42 +55,36 @@ public class ValidateReqResp {
 		final StringBuilder successReport = new StringBuilder();
 		final OpenAPI api = OpenApiValidator.loadApiFromString(openAPISpec);
 		logger.info("OpenAPI Specification {} - {}", api.getInfo().getVersion());
-		final OpenApiInteractionValidator openApiInteractionValidator = new Builder().withInlineApiSpecification(openAPISpec).build();
-		final List<OpenAPIExamples> parsedExamples = OpenApiValidator.parseExamples(api);
-		if(!parsedExamples.isEmpty()) {
-			parsedExamples.forEach(endpoint -> {
-				endpoint.getExamples().forEach((examplesKey, value) -> {
-					successReport.append('\n').append("On path ").append(endpoint.getPath()).append("and HTTP method ")
-					.append(examplesKey).append(", ").append(value.size()).append(" response tests were found");
-					logger.debug("On path {} and HTTP method {}, {} response tests were found", endpoint.getPath(), examplesKey, value.size());
-					value.forEach(example -> {
-						logger.info("Validate example response with verb {}, endpoint: {}, status: {},  name: {}",
-								examplesKey, endpoint.getPath(), example.getStatusCode(), example.getName());
-						final ValidationReport validationReport = validateResponse(openApiInteractionValidator,
-								getVerbFromVerbString(examplesKey), endpoint.getPath(), new HashMap<String, String>(),
-								new Integer(example.getStatusCode()).toString(), example.getPayload());
-						if (validationReport.hasErrors()) {
-							final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
-							
-							b.append('\n').append("Example: ").append(example.getName()).append('\n').append(report);
-							logger.error("{}\n", report);
-						} 
-					});
+		final OpenApiInteractionValidator openApiInteractionValidator = new Builder()
+				.withInlineApiSpecification(openAPISpec).build();
+		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
+			endpoint.getExamples().forEach((examplesKey, value) -> {
+				successReport.append('\n').append("On path ").append(endpoint.getPath()).append(" and HTTP method ")
+						.append(examplesKey).append(", ").append(value.size()).append(" response tests were found");
+				logger.debug("On path {} and HTTP method {}, {} response tests were found", endpoint.getPath(),
+						examplesKey, value.size());
+				value.forEach(example -> {
+					logger.info("Validate example response with verb {}, endpoint: {}, status: {},  name: {}",
+							examplesKey, endpoint.getPath(), example.getStatusCode(), example.getName());
+					final ValidationReport validationReport = validateResponse(openApiInteractionValidator,
+							getVerbFromVerbString(examplesKey), endpoint.getPath(), new HashMap<String, String>(),
+							new Integer(example.getStatusCode()).toString(), example.getPayload());
+					if (validationReport.hasErrors()) {
+						final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
+
+						b.append('\n').append("Example: ").append(example.getName()).append('\n').append(report);
+						logger.error("{}\n", report);
+					}
 				});
 			});
-			if(b.length() == 0) {
-				b.append("All examples (response only) were succesfully validated for OpenAPI Specification: ") //
-				.append(api.getInfo().getTitle()).append(" and version: ") //
-				.append(api.getInfo().getVersion());
-				b.append(successReport);
-			}
-		} else {
-			b.append("There were no examples found in OpenAPI Specification: ") //
-			.append(api.getInfo().getTitle()).append(" and version: ") //
-			.append(api.getInfo().getVersion());
+		});
+		if (b.length() == 0) {
+			b.append("There were no issues found when validating the example responses for OpenAPI Specification: ") //
+					.append(api.getInfo().getTitle()).append(" and version: ") //
+					.append(api.getInfo().getVersion());
 			b.append(successReport);
 		}
-			
+
 		return b.toString();
 	}
 	
