@@ -1,113 +1,146 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org">
-  <head>
-    <link rel="stylesheet" type="text/css" href="main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<script>
-		$(function() {
-			$('input[name="testType"]').on('click', function() {
-				if ($(this).val() == 'Response') {
-					$('#apiOperation').show();
-					$('#apiMethod').show();
-					$('#apiPayload').show();
-					$('#apiStatusCode').show();
-					$('#apiHeaders').hide();
-				} else if ($(this).val() == 'Request') {
-					$('#apiOperation').show();
-					$('#apiMethod').show();
-					$('#apiPayload').show();
-					$('#apiStatusCode').hide();
-					$('#apiHeaders').show();
-				} else if ($(this).val() == 'Examples') {
-					$('#apiOperation').hide();
-					$('#apiMethod').hide();
-					$('#apiPayload').hide();
-					$('#apiStatusCode').hide();
-					$('#apiHeaders').hide();
-				}
-			});
-		});
-	</script>
+<head>
+  <link rel="stylesheet" type="text/css" href="bulma.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenAPI Validator</title>
+  <style>
+    body {
+      background-color: hsl(0, 0%, 21%);
+      has-text-white: hsl(0, 0%, 100%);
+    }
+  </style>
 </head>
-  <body>
-    <div>
-      <br>
-      <h1>OpenAPI Specification - Validator</h1>
+<body>
+  <section class="section has-text-white">
+    <div class="container is-max-desktop">
+      <h1 class="title is-2 has-text-white mb-5">
+        OpenAPI Specification - Validator
+      </h1>
+      <div class="block">
+        Use this form to validate request or response examples against a given OpenAPI Specification. 
+      </div>
+      <div class="block">
+        <ul>
+          <li>For <b>request validations</b> following fields are required: 1, 2, 5 and 6</li>
+          <li>For <b>response</b> these fields are required: 1, 2, 3, 5 and 6</li>
+          <li>To validate <b>all examples</b> included in the OpenAPI Specification only field 5 is needed</li>
+        </ul>
+      </div>
+
       <form accept-charset="UTF-8" action="#" th:action="@{/index}" th:object="${validation}" method="post">
-      	<label class="text">What type of validation? </label>
-      	<input th:field="*{testType}" type="radio" value="Request" th:checked="${validation.testType == 'Request'}"> Request
-		<input th:field="*{testType}" type="radio" value="Response" th:checked="${validation.testType == 'Response'}"> Response
-		<input th:field="*{testType}" type="radio" value="Examples" th:checked="${validation.testType == 'Examples'}"> All OAS examples
-		<br/>
-        <div id="apiOperation" class="form-group" style="display: block">
-          <label class="text">API operation</label>
-          <input th:field="*{operation}" placeholder="example: /status">
+        <div class="field">
+          <label class="label has-text-white">Type of validation? </label>
+          <div class="control">
+            <label class="radio has-text-white">
+              <input th:field="*{testType}" th:checked="${validation.testType == 'Request'}" type="radio" value="Request">
+              Request
+            </label>
+            <label class="radio has-text-white">
+              <input th:field="*{testType}" th:checked="${validation.testType == 'Response'}" type="radio" value="Response">
+              Response
+            </label>
+            <label class="radio has-text-white">
+              <input th:field="*{testType}" th:checked="${validation.testType == 'Examples'}" type="radio" value="Examples">
+              All OAS examples
+            </label>
+          </div>
         </div>
-        <div id="apiMethod" class="form-group" style="display: block">
-          <label for="method">Method</label>
-          <select th:field="*{method}">
-            <option value="GET">GET</option>
-            <option value="PATCH">PATCH</option>
-            <option value="PUT">PUT</option>
-            <option value="POST">POST</option>
-          </select>
+
+        <div id="apiOperation" class="field">
+          <label class="label has-text-white">1. API Operation</label>
+          <div class="control">
+            <input th:field="*{operation}" class="input is-rounded" style="width: 50%;" type="text" placeholder="example: /status">
+          </div>
         </div>
-        
-        <div id="apiStatusCode" class="form-group" style="display: block">
-         <br/>
-          <label for="statusCode">Expected Status Code</label>
-          <select th:field="*{statusCode}" style="display: inline">
-            <option value="200">200</option>
-            <option value="201">201</option>
-            <option value="202">202</option>
-            <option value="204">204</option>
-            <option value="401">401</option>
-            <option value="403">403</option>
-            <option value="404">404</option>
-            <option value="405">405</option>
-            <option value="406">406</option>
-            <option value="407">407</option>
-            <option value="409">409</option>
-            <option value="410">410</option>
-            <option value="413">413</option>
-            <option value="415">415</option>
-            <option value="429">429</option>
-            <option value="500">500</option>
-            <option value="503">503</option>
-            <option value="504">504</option>
-          </select>
-          <label class="text">(only needed for response validations)</label>
+
+        <div id="apiMethod" class="field is-grouped">
+          <div class="control">
+            <label class="label has-text-white">2. Method</label>
+            <div class="select is-rounded">
+              <select th:field="*{method}">
+                <option value="GET">GET</option>
+                <option value="PATCH">PATCH</option>
+                <option value="PUT">PUT</option>
+                <option value="POST">POST</option>
+              </select>
+            </div>
+          </div>  
+          <div class="control">
+            <label class="label has-text-white">3. Expected Status Code</label>
+            <div class="select is-rounded">
+              <select th:field="*{statusCode}">
+                <option value="200">200</option>
+                <option value="201">201</option>
+                <option value="202">202</option>
+                <option value="204">204</option>
+                <option value="401">401</option>
+                <option value="403">403</option>
+                <option value="404">404</option>
+                <option value="405">405</option>
+                <option value="406">406</option>
+                <option value="407">407</option>
+                <option value="409">409</option>
+                <option value="410">410</option>
+                <option value="413">413</option>
+                <option value="415">415</option>
+                <option value="429">429</option>
+                <option value="500">500</option>
+                <option value="503">503</option>
+                <option value="504">504</option>
+              </select>
+            </div>
+          </div>
         </div>
-		<div id="apiHeaders" class="form-group" style="display: none">
-			<br /> 
-			<label class="text">HTTP Headers</label> 
-			<input th:field="*{headers}"
-				placeholder="example: headerName1:value1,headerName2:value2"
-				class="input-text"> 
-			<label class="text">(may be needed for request validations)</label>
-		</div>
-		<br/>
-        <div class="form-group">
-          <label class="text">Paste here your OpenAPI Specification</label>
-          <textarea th:field="*{contract}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="openapi: 3.0.0 ..." rows="5"></textarea>
+
+        <div id="apiHeaders" class="field">
+          <label class="label has-text-white">4. HTTP Headers</label>
+          <label class="label has-text-white is-size-7">(may be needed for request or response validations)</label>
+          <div class="control">
+            <input th:field="*{headers}" class="input is-rounded" style="width: 50%;" type="text" placeholder="example: headerName1:value1,headerName2:value2">
+          </div>
         </div>
-        <br/>
-        <div id="apiPayload" class="form-group" style="display: block">Paste here your request or response payload here (in JSON format)
-        	<textarea th:field="*{payload}" class="textarea textarea.is-code" data-gramm_editor="false" spellcheck="false" autofocus="" placeholder="{}"></textarea>
+
+        <div class="field">
+          <label class="label has-text-white">5. Paste here your OpenAPI Specification</label>
+          <label class="label has-text-white is-size-7">(This field is required)</label>
+          <div class="control" style="width: 75%;">
+            <textarea th:field="*{contract}"  class="textarea is-rounded is-small is-danger" rows="10" placeholder="openapi: 3.0.0 ..."></textarea>
+          </div>
         </div>
-        <br/>
-        <button type="submit" class="form-btn">Submit</button>
+
+        <div id="apiPayload" class="field">
+          <label class="label has-text-white">6. Paste here your request or response example</label>
+          <div class="control" style="width: 75%;">
+            <textarea th:field="*{payload}" class="textarea is-small" rows="10" placeholder="{ ... }"></textarea>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <button class="button is-link is-rounded mb-5">Submit</button>
+          </div>
+        </div>
       </form>
-		<div th:if="${not #strings.isEmpty(validation.validationReport)}">
-			<div th:if="${validation.valid}">
-				<h3>Congratulations!</h3>
-				<p class="textarea" th:utext="${validation.validationReport}" />
-			</div>
-			<div th:unless="${validation.valid}">
-				<h3>Oops, an error occurred!</h3>
-				<p class="red-text" th:utext="${validation.validationReport}" />
-			</div>
-		</div>
-	</div>
-  </body>
+
+      <div th:if="${not #strings.isEmpty(validation.validationReport)}">
+        <div class="field">
+          <div th:if="${validation.valid}">
+            <label class="label has-text-white is-size-5">Congratulations!</label>
+            <div class="control" style="width: 75%;">
+              <textarea th:utext="${validation.validationReport}" class="textarea is-small" rows="10"></textarea>
+            </div>
+          </div>
+          <div th:unless="${validation.valid}">
+            <label class="label has-text-white is-size-6">Oops, an error occurred!</label>
+            <div class="control" style="width: 75%;">
+              <textarea th:utext="${validation.validationReport}" class="textarea is-small is-danger" rows="10"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
 </html>

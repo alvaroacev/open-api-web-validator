@@ -43,7 +43,7 @@ public class ValidationController {
 		case "Examples":
 			validationReport = ValidateReqResp.validateExamples(validation.getContract());
 			validation.setValid(!validationReport.contains("ERROR"));
-			validation.setValidationReport(validationReport.replaceAll("\n", "<br>"));
+			validation.setValidationReport(validationReport);
 			logger.info("Resuls of the example validations: {}", validation);
 			break;
 
