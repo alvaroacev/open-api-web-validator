@@ -1,0 +1,83 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+              example: 
+                name: Fluffy
+                petType: Persian
+  /cats/{catId}:
+    get:
+      summary: Info for a specific cat
+      operationId: showCatById
+      tags:
+        - pets
+      parameters:
+        - name: catId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cat"
+              example: 
+                name: Tommy
+                petType: Persian
+                huntingSkill: lazy
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+        petType:
+          type: string
+      required:
+      - name
+      - petType
+    Cat:  ## "Cat" will be used as the discriminator value
+      description: A representation of a cat
+      allOf:
+      - $ref: '#/components/schemas/Pet'
+      - type: object
+        properties:
+          huntingSkill:
+            type: string
+            description: The measured skill for hunting
+            enum:
+            - clueless
+            - lazy
+            - adventurous
+            - aggressive
+        required:
+        - huntingSkill
