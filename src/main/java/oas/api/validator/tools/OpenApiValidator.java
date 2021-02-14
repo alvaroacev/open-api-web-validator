@@ -26,8 +26,9 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import oas.api.validator.model.Example;
 import oas.api.validator.model.OpenAPIExamples;
+import oas.api.validator.model.RequestExample;
+import oas.api.validator.model.ResponseExample;
 
 public class OpenApiValidator {
 
@@ -40,7 +41,7 @@ public class OpenApiValidator {
 	public static List<OpenAPIExamples> printResults(OpenAPI openApi) {
 		List<OpenAPIExamples> openAPIExamples = parseExamples(openApi);
 		openAPIExamples.forEach(e -> {
-			e.getExamples().forEach((keyE, valueE) -> {
+			e.getResponseExamples().forEach((keyE, valueE) -> {
 				logger.info("On path {} and HTTP method {}, {} response tests were found", e.getPath(), keyE, valueE.size());
 			});
 		});
@@ -56,43 +57,109 @@ public class OpenApiValidator {
 			api.setPath(key);
 			if (value.getGet() != null) {
 				logger.debug("Found definition of GET on path: {}", key);
-				final List<Example> responses = new ArrayList<>();
+				final List<ResponseExample> responses = new ArrayList<>();
 				value.getGet().getResponses().forEach((keyR, valueR) -> {
-					responses.addAll(searchResponseExamples(openApi, keyR, valueR));
+					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getExamples().put("GET", responses);
+				api.getResponseExamples().put("GET", responses);
 			}
 			if (value.getPost() != null) {
 				logger.debug("Found definition of POST on path: {}", key);
-				final List<Example> responses = new ArrayList<>();
+				final List<ResponseExample> responses = new ArrayList<>();
 				value.getPost().getResponses().forEach((keyR, valueR) -> {
-					responses.addAll(searchResponseExamples(openApi, keyR, valueR));
+					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getExamples().put("POST", responses);
+				api.getResponseExamples().put("POST", responses);
+				
+				final List<RequestExample> requests = new ArrayList<>();
+				requests.addAll(findRequestsExamples(openApi, value.getPost().getRequestBody()));
+				if(requests.size() > 0) {
+					api.getRequestExamples().put("POST", requests);
+					setRequestParameters(requests, value.getPost().getParameters());
+				}
+				
 			}
 			if (value.getPut() != null) {
 				logger.debug("Found definition of PUT on path: {}", key);
-				final List<Example> responses = new ArrayList<>();
+				final List<ResponseExample> responses = new ArrayList<>();
 				value.getPut().getResponses().forEach((keyR, valueR) -> {
-					responses.addAll(searchResponseExamples(openApi, keyR, valueR));
+					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getExamples().put("PUT", responses);
+				api.getResponseExamples().put("PUT", responses);
+				
+				final List<RequestExample> requests = new ArrayList<>();
+				requests.addAll(findRequestsExamples(openApi, value.getPut().getRequestBody()));
+				if(requests.size() > 0) {
+					api.getRequestExamples().put("PUT", requests);
+					setRequestParameters(requests, value.getPut().getParameters());
+				}
 			}
 			if (value.getPatch() != null) {
 				logger.debug("Found definition of PATCH on path: {}", key);
-				final List<Example> responses = new ArrayList<>();
+				final List<ResponseExample> responses = new ArrayList<>();
 				value.getPut().getResponses().forEach((keyR, valueR) -> {
-					responses.addAll(searchResponseExamples(openApi, keyR, valueR));
+					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getExamples().put("PATCH", responses);
+				api.getResponseExamples().put("PATCH", responses);
+				
+				final List<RequestExample> requests = new ArrayList<>();
+				requests.addAll(findRequestsExamples(openApi, value.getPatch().getRequestBody()));
+				if(requests.size() > 0) {
+					api.getRequestExamples().put("PATCH", requests);
+					setRequestParameters(requests, value.getPatch().getParameters());
+				}
+			}
+			if (value.getDelete() != null) {
+				logger.debug("Found definition of DELETE on path: {}", key);
+				final List<ResponseExample> responses = new ArrayList<>();
+				value.getDelete().getResponses().forEach((keyR, valueR) -> {
+					responses.addAll(findResponseExamples(openApi, keyR, valueR));
+				});
+				api.getResponseExamples().put("DELETE", responses);
 			}
 			openAPIExamples.add(api);
 		});
 		return openAPIExamples;
 	}
 
-	private static List<Example> searchResponseExamples(OpenAPI openApi, String statusCode, ApiResponse response) {
-		final List<Example> responses = new ArrayList<>();
+	private static void setRequestParameters(final List<RequestExample> requests, final List<Parameter> parameters) {
+		final Map<String, String> pathParameters = new HashMap<String, String>();
+		final Map<String, String> queryParameters = new HashMap<String, String>();
+		final Map<String, String> requestHeaders = new HashMap<String, String>();
+		if(parameters != null) {
+			parameters.forEach(param -> {
+				if (param.getRequired()) {
+					switch (param.getIn()) {
+					case "path":
+						if (param.getExample() != null) {
+							pathParameters.put(param.getName(), param.getExample().toString());
+						}
+						break;
+					case "query":
+						if (param.getExample() != null) {
+							queryParameters.put(param.getName(), param.getExample().toString());
+						}
+						break;
+					case "header":
+						if (param.getExample() != null) {
+							requestHeaders.put(param.getName(), param.getExample().toString());
+						}
+						break;
+					default:
+						logger.warn("parameter type {}, not suported", param.getIn());
+						break;
+					}
+				}});
+			requests.forEach(request -> {
+				request.getQueryParameters().putAll(queryParameters);
+				request.getRequestHeaders().putAll(requestHeaders);
+				request.getPathParameters().putAll(pathParameters);
+			});
+		}
+	}
+
+	private static List<ResponseExample> findResponseExamples(OpenAPI openApi, String statusCode, ApiResponse response) {
+		final List<ResponseExample> responses = new ArrayList<>();
 		final Integer status = buildStatusCode(statusCode);
 		if (status != null) {
 			if (response.get$ref() != null) {
@@ -101,17 +168,38 @@ public class OpenApiValidator {
 					extractExamples(openApi.getComponents().getResponses().get(componentName).getContent(), //
 							componentName, openApi.getComponents()) //
 									.forEach((keyE, valueE) -> {
-										responses.add(new Example(keyE, status, valueE));
+										responses.add(new ResponseExample(keyE, status, valueE));
 									});
 			} else {
 				extractExamples(response.getContent(), //
 						null, openApi.getComponents()) //
 								.forEach((keyE, valueE) -> {
-									responses.add(new Example(keyE, status, valueE));
+									responses.add(new ResponseExample(keyE, status, valueE));
 								});
 			}
 		}
 		return responses;
+	}
+
+
+	private static List<RequestExample> findRequestsExamples(OpenAPI openApi, RequestBody request) {
+		final List<RequestExample> requests = new ArrayList<>();
+			if (request.get$ref() != null) {
+				final String componentName = request.get$ref().substring(request.get$ref().lastIndexOf("/") + 1);
+					logger.debug("Component {} found", componentName);
+					extractExamples(openApi.getComponents().getRequestBodies().get(componentName).getContent(), //
+							componentName, openApi.getComponents()) //
+									.forEach((keyE, valueE) -> {
+										requests.add(new RequestExample(keyE, valueE));
+									});
+			} else {
+				extractExamples(request.getContent(), //
+						null, openApi.getComponents()) //
+								.forEach((keyE, valueE) -> {
+									requests.add(new RequestExample(keyE, valueE));
+								});
+			}
+		return requests;
 	}
 	
 	private static Map<String, String> extractExamples(Content content, String componentName, Components components) {

@@ -37,7 +37,7 @@ public class ValidateReqResp {
 	public static String validateResponse(String openAPISpec, String verbString, String path, Map<String, String> responseHeaders, String statusCode, String responseBody) {
 		String response = new String();
 		final OpenApiInteractionValidator openApiInteractionValidator = OpenApiInteractionValidator.createForInlineApiSpecification(openAPISpec).build();
-		final Request.Method verb = getVerbFromVerbString(verbString);
+		final Request.Method verb = getVerbFromString(verbString);
 		final ValidationReport validateResponse = validateResponse(openApiInteractionValidator, verb, path, responseHeaders, statusCode, responseBody);
 		if (validateResponse.hasErrors()) {
 			response = SimpleValidationReportFormat.getInstance().apply(validateResponse);
@@ -58,28 +58,50 @@ public class ValidateReqResp {
 		final OpenApiInteractionValidator openApiInteractionValidator = new Builder()
 				.withInlineApiSpecification(openAPISpec).build();
 		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
-			endpoint.getExamples().forEach((examplesKey, value) -> {
+			//validate response examples
+			endpoint.getResponseExamples().forEach((exampleKey, value) -> {
 				successReport.append('\n').append("On path ").append(endpoint.getPath()).append(" and HTTP method ")
-						.append(examplesKey).append(", ").append(value.size()).append(" response tests were found");
-				logger.debug("On path {} and HTTP method {}, {} response tests were found", endpoint.getPath(),
-						examplesKey, value.size());
-				value.forEach(example -> {
+						.append(exampleKey).append(", ").append(value.size()).append(" response examples found");
+				logger.debug("On path {} and HTTP method {}, {} response examples found", endpoint.getPath(),
+						exampleKey, value.size());
+				value.forEach(reqExample -> {
 					logger.info("Validate example response with verb {}, endpoint: {}, status: {},  name: {}",
-							examplesKey, endpoint.getPath(), example.getStatusCode(), example.getName());
+							exampleKey, endpoint.getPath(), reqExample.getStatusCode(), reqExample.getName());
 					final ValidationReport validationReport = validateResponse(openApiInteractionValidator,
-							getVerbFromVerbString(examplesKey), endpoint.getPath(), new HashMap<String, String>(),
-							new Integer(example.getStatusCode()).toString(), example.getPayload());
+							getVerbFromString(exampleKey), endpoint.getPath(), new HashMap<String, String>(),
+							new Integer(reqExample.getStatusCode()).toString(), reqExample.getPayload());
 					if (validationReport.hasErrors()) {
 						final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
 
-						b.append('\n').append("Example: ").append(example.getName()).append('\n').append(report);
+						b.append('\n').append("Example: ").append(reqExample.getName()).append('\n').append(report);
 						logger.error("{}\n", report);
 					}
 				});
 			});
+			// validate request examples
+			endpoint.getRequestExamples().forEach((examplesKey, value) -> {
+				successReport.append('\n').append("On path ").append(endpoint.getPath()).append(" and HTTP method ")
+						.append(examplesKey).append(", ").append(value.size()).append(" request examples found");
+				logger.debug("On path {} and HTTP method {}, {} request examples found", endpoint.getPath(),
+						examplesKey, value.size());
+				value.forEach(reqExample -> {
+					logger.info("Validate example request with verb {}, endpoint: {}, name: {}",
+							examplesKey, endpoint.getPath(), reqExample.getName());
+					final ValidationReport validationReport = validateRequest(openApiInteractionValidator,
+							getVerbFromString(examplesKey), endpoint.getPath(), reqExample.getPathParameters(), reqExample.getQueryParameters(),
+							reqExample.getRequestHeaders(), reqExample.getPayload());
+					if (validationReport.hasErrors()) {
+						final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
+
+						b.append('\n').append("Example: ").append(reqExample.getName()).append('\n').append(report);
+						logger.error("{}\n", report);
+					}
+				});
+
+			});
 		});
 		if (b.length() == 0) {
-			b.append("There were no issues found when validating the example responses for OpenAPI Specification: ") //
+			b.append("No issue found when validating the example requests and responses for OpenAPI Specification: ") //
 					.append(api.getInfo().getTitle()).append(" and version: ") //
 					.append(api.getInfo().getVersion());
 			b.append(successReport);
@@ -98,11 +120,11 @@ public class ValidateReqResp {
      * @param requestBody The HTTP request body.
      * @return String containing a validation error report, empty otherwise
      */
-    public static String validateRequest(String openAPISpec, String verbString, String path, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
+    public static String validateRequest(String openAPISpec, String verbString, String path, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
     	String response = new String();
         final OpenApiInteractionValidator openApiInteractionValidator = OpenApiInteractionValidator.createForInlineApiSpecification(openAPISpec).build();
-        final Request.Method verb = getVerbFromVerbString(verbString);
-        final ValidationReport validateRequest = validateRequest(openApiInteractionValidator, verb, path, queryParameters, requestHeaders, requestBody);
+        final Request.Method verb = getVerbFromString(verbString);
+        final ValidationReport validateRequest = validateRequest(openApiInteractionValidator, verb, path, pathParameters, queryParameters, requestHeaders, requestBody);
 		if (validateRequest.hasErrors()) {
 			response = SimpleValidationReportFormat.getInstance().apply(validateRequest);
 		}
@@ -143,7 +165,7 @@ public class ValidateReqResp {
      * @param verbString The HTTP verb string to be converted.
      * @return The Request.Method object.
      */
-    private static Request.Method getVerbFromVerbString(String verbString) {
+    private static Request.Method getVerbFromString(String verbString) {
         final Request.Method verb;
         logger.debug("String {} will be converted", verbString);
         try {
@@ -169,8 +191,8 @@ public class ValidateReqResp {
      * @param requestBody The HTTP request body.
      * @return The ValidationReport object containing the results of the HTTP request validation against the OAS.
      */
-    private static ValidationReport validateRequest(OpenApiInteractionValidator openApiInteractionValidator, Request.Method verb, String path, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
-        final Request request = buildRequest(verb, path, queryParameters, requestHeaders, requestBody);
+    private static ValidationReport validateRequest(OpenApiInteractionValidator openApiInteractionValidator, Request.Method verb, String path, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
+        final Request request = buildRequest(verb, path, pathParameters, queryParameters, requestHeaders, requestBody);
         logger.debug("request: {}", request);
 
         final ValidationReport validationReport = openApiInteractionValidator.validateRequest(request);
@@ -192,8 +214,13 @@ public class ValidateReqResp {
      * @param requestBody The HTTP request body.
      * @return The HTTP request.
      */
-    private static Request buildRequest(Request.Method verb, String path, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
+    private static Request buildRequest(Request.Method verb, String path, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
         final SimpleRequest.Builder builder;
+//        pathParameters.forEach((key, value) -> { path = path.replace("{"+key+"}", value); });
+        for (Map.Entry<String, String> entry : pathParameters.entrySet()) {
+            path = path.replace("{"+entry.getKey()+"}", entry.getValue());
+        }
+        
         switch (verb) {
             case POST:
                 builder = SimpleRequest.Builder.post(path);

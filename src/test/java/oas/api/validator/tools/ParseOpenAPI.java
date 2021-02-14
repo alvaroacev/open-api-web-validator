@@ -35,7 +35,7 @@ public class ParseOpenAPI {
 		List<OpenAPIExamples> openAPIExamples = OpenApiValidator.printResults(openApi);
 		Optional<OpenAPIExamples> result = openAPIExamples.stream().filter(example -> example.getPath().equals("/pets/findByStatus")).findFirst();
 		assertTrue(result.isPresent());
-		assertTrue(result.get().getExamples().size() == 1);
+		assertTrue(result.get().getResponseExamples().size() == 1);
 	}
 	
 	@Test
@@ -47,7 +47,7 @@ public class ParseOpenAPI {
 		List<OpenAPIExamples> openAPIExamples = OpenApiValidator.printResults(openApi);
 		Optional<OpenAPIExamples> result = openAPIExamples.stream().filter(example -> example.getPath().equals("/pets")).findFirst();
 		assertTrue(result.isPresent());
-		assertTrue(result.get().getExamples().get("POST").size() == 1);
+		assertTrue(result.get().getResponseExamples().get("POST").size() == 1);
 	}
 	
 	@Test
@@ -59,7 +59,7 @@ public class ParseOpenAPI {
 		List<OpenAPIExamples> openAPIExamples = OpenApiValidator.printResults(openApi);
 		Optional<OpenAPIExamples> result = openAPIExamples.stream().filter(example -> example.getPath().equals("/pets")).findFirst();
 		assertTrue(result.isPresent());
-		assertTrue(result.get().getExamples().get("PUT").size() == 1);
+		assertTrue(result.get().getResponseExamples().get("PUT").size() == 1);
 	}
 	
 }

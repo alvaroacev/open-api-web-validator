@@ -82,7 +82,7 @@ public class ValidationController {
 			validationReport = ValidateReqResp.validateRequest(validation.getContract(), //
 					validation.getMethod(), //
 					validation.getOperation(), //
-					null, requestHeaders, //
+					new HashMap<String, String>(), new HashMap<String, String>(), requestHeaders, //
 					validation.getPayload());
 			if (validationReport.isEmpty()) {
 				validation.setValid(true);

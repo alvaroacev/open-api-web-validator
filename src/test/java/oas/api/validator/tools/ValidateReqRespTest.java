@@ -69,7 +69,28 @@ class ValidateReqRespTest {
 	public void testNoExample() {
 		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/no-example-defined.yaml");
 		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
-		assertTrue(validateExamples.contains("On path /solicitors and HTTP method POST, 0 response tests were found")); 
+		assertTrue(validateExamples.contains("On path /solicitors and HTTP method POST, 0 response examples found")); 
 	}
-
+	
+	@Test 
+	public void testRequestExamples() {
+		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/dog_requests.yaml");
+		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
+		assertTrue(validateExamples.contains("No issue found when validating the example requests and responses for OpenAPI Specification")); 
+	}
+	
+	@Test 
+	public void testRequestExamplesError() {
+		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/dog_requests_error.yaml");
+		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
+		assertTrue(validateExamples.contains("ERROR")); 
+	}
+	
+	@Test 
+	public void testRequestExamplesMandatoryParams() {
+		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/dog_requests_mandatory_params.yaml");
+		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
+		assertTrue(validateExamples.contains("No issue found when validating the example requests and responses for OpenAPI Specification")); 
+	}
+	
 }

@@ -1,0 +1,91 @@
+openapi: 3.0.1
+info:
+  title: Swagger Petstore - required request parameters
+  description: Sample server Petstore server.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+tags:
+- name: pet
+  description: Everything about your Pets
+  externalDocs:
+    description: Find out more
+    url: http://swagger.io
+- name: store
+  description: Access to Petstore orders
+paths:
+  /pet/{petId}:
+    post:
+      tags:
+      - pet
+      summary: Updates a pet in the store with form data
+      operationId: updatePetWithForm
+      parameters:
+      - name: petId
+        in: path
+        description: ID of pet that needs to be updated
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 086dc8c0-f561-48a9-ad6e-d14623e739e1
+      - name: X-RequestID
+        in: header
+        description: ID of pet that needs to be updated
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 086dc8c0-f561-48a9-ad6e-d14623e739e1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Updated name of the pet
+                status:
+                  type: string
+                  description: Updated status of the pet
+            examples:
+              Whisper:
+                value:
+                  name: "whisper"
+                  status: "available"
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Updated name of the pet
+                status:
+                  type: string
+                  description: Updated status of the pet
+      responses:
+        405:
+          description: Invalid input
+          content: {}
+components:
+  examples:
+    dog_splash:
+      value:
+        id: 12345
+        name: splash
+        photoUrls:
+          - https://images.unsplash.com/photo-1554079501-a254f876fc77?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHw%3D&auto=format&fit=crop&w=800&q=60
+        status: sold
+    dog_whisper:
+      value:
+        id: 2018123
+        name: Whisper
+        photoUrls:
+          - https://cdn.sixtyandme.com/wp-content/uploads/2018/10/Sixty-and-Me_Queen-Elizabeth-Says-Goodbye-to-Her-Beloved-Four-Legged-Friend.jpg
+        status: sold
