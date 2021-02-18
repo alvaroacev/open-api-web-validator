@@ -34,7 +34,7 @@ public class OpenApiValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenApiValidator.class);
 
-    public final static String APPLICATION_JSON = "application/json";
+    private final static String APPLICATION_JSON = "application/json";
 
     private OpenApiValidator() {}
 	
@@ -50,18 +50,18 @@ public class OpenApiValidator {
 	}
 
 	public static List<OpenAPIExamples> parseExamples(OpenAPI openApi) {
-		List<OpenAPIExamples> openAPIExamples = new ArrayList<>();
+		final List<OpenAPIExamples> openAPIExamples = new ArrayList<>();
 
 		openApi.getPaths().forEach((path, pathObject) -> {
-			final OpenAPIExamples api = new OpenAPIExamples();
-			api.setPath(path);
+			final OpenAPIExamples apiExamples = new OpenAPIExamples();
+			apiExamples.setPath(path);
 			if (pathObject.getGet() != null) {
 				logger.debug("Found definition of GET on path: {}", path);
 				final List<ResponseExample> responses = new ArrayList<>();
 				pathObject.getGet().getResponses().forEach((keyR, valueR) -> {
 					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getResponseExamples().put("GET", responses);
+				apiExamples.getResponseExamples().put("GET", responses);
 			}
 			if (pathObject.getPost() != null) {
 				logger.debug("Found definition of POST on path: {}", path);
@@ -69,12 +69,12 @@ public class OpenApiValidator {
 				pathObject.getPost().getResponses().forEach((keyR, valueR) -> {
 					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getResponseExamples().put("POST", responses);
+				apiExamples.getResponseExamples().put("POST", responses);
 				
 				final List<RequestExample> requests = new ArrayList<>();
 				requests.addAll(findRequestsExamples(openApi, pathObject.getPost().getRequestBody()));
 				if(requests.size() > 0) {
-					api.getRequestExamples().put("POST", requests);
+					apiExamples.getRequestExamples().put("POST", requests);
 					setRequestParameters(openApi, requests, pathObject.getPost().getParameters());
 				}
 				
@@ -85,12 +85,12 @@ public class OpenApiValidator {
 				pathObject.getPut().getResponses().forEach((keyR, valueR) -> {
 					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getResponseExamples().put("PUT", responses);
+				apiExamples.getResponseExamples().put("PUT", responses);
 				
 				final List<RequestExample> requests = new ArrayList<>();
 				requests.addAll(findRequestsExamples(openApi, pathObject.getPut().getRequestBody()));
 				if(requests.size() > 0) {
-					api.getRequestExamples().put("PUT", requests);
+					apiExamples.getRequestExamples().put("PUT", requests);
 					setRequestParameters(openApi, requests, pathObject.getPut().getParameters());
 				}
 			}
@@ -100,12 +100,12 @@ public class OpenApiValidator {
 				pathObject.getPut().getResponses().forEach((keyR, valueR) -> {
 					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getResponseExamples().put("PATCH", responses);
+				apiExamples.getResponseExamples().put("PATCH", responses);
 				
 				final List<RequestExample> requests = new ArrayList<>();
 				requests.addAll(findRequestsExamples(openApi, pathObject.getPatch().getRequestBody()));
 				if(requests.size() > 0) {
-					api.getRequestExamples().put("PATCH", requests);
+					apiExamples.getRequestExamples().put("PATCH", requests);
 					setRequestParameters(openApi, requests, pathObject.getPatch().getParameters());
 				}
 			}
@@ -115,9 +115,16 @@ public class OpenApiValidator {
 				pathObject.getDelete().getResponses().forEach((keyR, valueR) -> {
 					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
-				api.getResponseExamples().put("DELETE", responses);
+				apiExamples.getResponseExamples().put("DELETE", responses);
+				
+				final List<RequestExample> requests = new ArrayList<>();
+				requests.addAll(findRequestsExamples(openApi, pathObject.getDelete().getRequestBody()));
+				if(requests.size() > 0) {
+					apiExamples.getRequestExamples().put("DELETE", requests);
+					setRequestParameters(openApi, requests, pathObject.getDelete().getParameters());
+				}
 			}
-			openAPIExamples.add(api);
+			openAPIExamples.add(apiExamples);
 		});
 		return openAPIExamples;
 	}
@@ -157,7 +164,7 @@ public class OpenApiValidator {
 				}});
 			requests.forEach(request -> {
 				request.getQueryParameters().putAll(queryParameters);
-				request.getRequestHeaders().putAll(requestHeaders);
+				request.getHeaderParameters().putAll(requestHeaders);
 				request.getPathParameters().putAll(pathParameters);
 			});
 		}
@@ -189,14 +196,15 @@ public class OpenApiValidator {
 
 	private static List<RequestExample> findRequestsExamples(OpenAPI openApi, RequestBody request) {
 		final List<RequestExample> requests = new ArrayList<>();
+		if (request != null) {
 			if (request.get$ref() != null) {
 				final String componentName = request.get$ref().substring(request.get$ref().lastIndexOf("/") + 1);
-					logger.debug("Component {} found", componentName);
-					extractExamples(openApi.getComponents().getRequestBodies().get(componentName).getContent(), //
-							componentName, openApi.getComponents()) //
-									.forEach((keyE, valueE) -> {
-										requests.add(new RequestExample(keyE, valueE));
-									});
+				logger.debug("Component {} found", componentName);
+				extractExamples(openApi.getComponents().getRequestBodies().get(componentName).getContent(), //
+						componentName, openApi.getComponents()) //
+								.forEach((keyE, valueE) -> {
+									requests.add(new RequestExample(keyE, valueE));
+								});
 			} else {
 				extractExamples(request.getContent(), //
 						null, openApi.getComponents()) //
@@ -204,13 +212,14 @@ public class OpenApiValidator {
 									requests.add(new RequestExample(keyE, valueE));
 								});
 			}
+		}
 		return requests;
 	}
 	
 	private static Map<String, String> extractExamples(Content content, String componentName, Components components) {
-		Map<String, String> examples = new HashMap<>();
+		final Map<String, String> examples = new HashMap<>();
 		if (content != null) {
-			MediaType mediaType = content.get(APPLICATION_JSON);
+			final MediaType mediaType = content.get(APPLICATION_JSON);
 			if (mediaType != null) {
 				if (mediaType.getExample() != null) {
 					logger.debug("Adding the example found on component name {}", componentName);

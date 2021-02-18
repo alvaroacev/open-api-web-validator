@@ -2,6 +2,7 @@ package oas.api.validator.tools;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +61,8 @@ public class ValidateReqResp {
 		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
 			//validate response examples
 			endpoint.getResponseExamples().forEach((exampleKey, value) -> {
-				successReport.append('\n').append("On path ").append(endpoint.getPath()).append(" and HTTP method ")
-						.append(exampleKey).append(", ").append(value.size()).append(" response examples found");
+				successReport.append('\n').append("On ")
+						.append(exampleKey).append(" ").append(endpoint.getPath()).append(", ").append(value.size()).append(" response examples found");
 				logger.debug("On path {} and HTTP method {}, {} response examples found", endpoint.getPath(),
 						exampleKey, value.size());
 				value.forEach(reqExample -> {
@@ -79,17 +80,17 @@ public class ValidateReqResp {
 				});
 			});
 			// validate request examples
-			endpoint.getRequestExamples().forEach((examplesKey, value) -> {
-				successReport.append('\n').append("On path ").append(endpoint.getPath()).append(" and HTTP method ")
-						.append(examplesKey).append(", ").append(value.size()).append(" request examples found");
+			endpoint.getRequestExamples().forEach((exampleKey, value) -> {
+				successReport.append('\n').append("On ").append(exampleKey).append(" ").append(endpoint.getPath())
+						.append(", ").append(value.size()).append(" request examples found");
 				logger.debug("On path {} and HTTP method {}, {} request examples found", endpoint.getPath(),
-						examplesKey, value.size());
+						exampleKey, value.size());
 				value.forEach(reqExample -> {
 					logger.info("Validate example request with verb {}, endpoint: {}, name: {}",
-							examplesKey, endpoint.getPath(), reqExample.getName());
+							exampleKey, endpoint.getPath(), reqExample.getName());
 					final ValidationReport validationReport = validateRequest(openApiInteractionValidator,
-							getVerbFromString(examplesKey), endpoint.getPath(), reqExample.getPathParameters(), reqExample.getQueryParameters(),
-							reqExample.getRequestHeaders(), reqExample.getPayload());
+							getVerbFromString(exampleKey), endpoint.getPath(), reqExample.getPathParameters(), reqExample.getQueryParameters(),
+							reqExample.getHeaderParameters(), reqExample.getPayload());
 					if (validationReport.hasErrors()) {
 						final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
 
@@ -214,31 +215,30 @@ public class ValidateReqResp {
      * @param requestBody The HTTP request body.
      * @return The HTTP request.
      */
-    private static Request buildRequest(Request.Method verb, String path, Map<String, String> pathParameters, Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
+    private static Request buildRequest(final Request.Method verb, final String path, final Map<String, String> pathParameters, final Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
         final SimpleRequest.Builder builder;
-//        pathParameters.forEach((key, value) -> { path = path.replace("{"+key+"}", value); });
-        for (Map.Entry<String, String> entry : pathParameters.entrySet()) {
-            path = path.replace("{"+entry.getKey()+"}", entry.getValue());
-        }
-        
+		String resultPath = pathParameters.isEmpty() ? path
+				: pathParameters.entrySet().stream().map(e -> path.replace("{" + e.getKey() + "}", e.getValue()))
+						.collect(Collectors.joining());
+
         switch (verb) {
             case POST:
-                builder = SimpleRequest.Builder.post(path);
+                builder = SimpleRequest.Builder.post(resultPath);
                 break;
             case GET:
-                builder = SimpleRequest.Builder.get(path);
+                builder = SimpleRequest.Builder.get(resultPath);
                 break;
             case HEAD:
-                builder = SimpleRequest.Builder.head(path);
+                builder = SimpleRequest.Builder.head(resultPath);
                 break;
             case PUT:
-                builder = SimpleRequest.Builder.put(path);
+                builder = SimpleRequest.Builder.put(resultPath);
                 break;
             case PATCH:
-                builder = SimpleRequest.Builder.patch(path);
+                builder = SimpleRequest.Builder.patch(resultPath);
                 break;
             case DELETE:
-                builder = SimpleRequest.Builder.delete(path);
+                builder = SimpleRequest.Builder.delete(resultPath);
                 break;
             default:
                 logger.error("The HTTP verb '{}' is not supported.", verb);

@@ -69,7 +69,7 @@ class ValidateReqRespTest {
 	public void testNoExample() {
 		final String apiContent = ResourceLoader.getResourceAsString("openapi-specs/no-example-defined.yaml");
 		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
-		assertTrue(validateExamples.contains("On path /solicitors and HTTP method POST, 0 response examples found")); 
+		assertTrue(validateExamples.contains("On POST /solicitors, 0 response examples found")); 
 	}
 	
 	@Test 
