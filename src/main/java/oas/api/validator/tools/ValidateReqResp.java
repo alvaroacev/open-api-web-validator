@@ -59,13 +59,11 @@ public class ValidateReqResp {
 		final StringBuilder successReport = new StringBuilder();
 		final OpenAPI api = OpenApiValidator.loadApiFromString(openAPISpec);
 		logger.info("OpenAPI Specification {} - {}", api.getInfo().getVersion());
-		final LevelResolver level = new com.atlassian.oai.validator.report.LevelResolver.Builder()
-				.withLevel("validation.request.parameter.query.unexpected", ValidationReport.Level.IGNORE) //
-				.withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE) //
-				.build();
 		final OpenApiInteractionValidator openApiInteractionValidator = new Builder()
 				.withInlineApiSpecification(openAPISpec) //
-				.withLevelResolver(level)
+				.withLevelResolver(LevelResolver.create()
+						.withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE) //
+						.build())
 				.build();
 		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
 			//validate response examples
