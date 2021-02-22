@@ -1,5 +1,7 @@
 package oas.api.validator.tools;
 
+import static com.atlassian.oai.validator.schema.SchemaValidator.ADDITIONAL_PROPERTIES_KEY;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +15,7 @@ import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.Response;
 import com.atlassian.oai.validator.model.SimpleRequest;
 import com.atlassian.oai.validator.model.SimpleResponse;
+import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.report.SimpleValidationReportFormat;
 import com.atlassian.oai.validator.report.ValidationReport;
 
@@ -56,8 +59,14 @@ public class ValidateReqResp {
 		final StringBuilder successReport = new StringBuilder();
 		final OpenAPI api = OpenApiValidator.loadApiFromString(openAPISpec);
 		logger.info("OpenAPI Specification {} - {}", api.getInfo().getVersion());
+		final LevelResolver level = new com.atlassian.oai.validator.report.LevelResolver.Builder()
+				.withLevel("validation.request.parameter.query.unexpected", ValidationReport.Level.IGNORE) //
+				.withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE) //
+				.build();
 		final OpenApiInteractionValidator openApiInteractionValidator = new Builder()
-				.withInlineApiSpecification(openAPISpec).build();
+				.withInlineApiSpecification(openAPISpec) //
+				.withLevelResolver(level)
+				.build();
 		OpenApiValidator.parseExamples(api).forEach(endpoint -> {
 			//validate response examples
 			endpoint.getResponseExamples().forEach((exampleKey, value) -> {

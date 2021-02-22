@@ -28,7 +28,7 @@ public class ValidationController {
 	@GetMapping("/index")
 	public String indexForm(Model model) {
 		OpenAPIValidation validation = new OpenAPIValidation();
-		validation.setTestType("Response");
+		validation.setTestType("Examples");
 		model.addAttribute("validation", validation);
 		return "index";
 	}

@@ -75,7 +75,7 @@ public class OpenApiValidator {
 				requests.addAll(findRequestsExamples(openApi, pathObject.getPost().getRequestBody()));
 				if(requests.size() > 0) {
 					apiExamples.getRequestExamples().put("POST", requests);
-					setRequestParameters(openApi, requests, pathObject.getPost().getParameters());
+					buildRequestParameters(openApi, requests, pathObject.getPost().getParameters());
 				}
 				
 			}
@@ -91,7 +91,7 @@ public class OpenApiValidator {
 				requests.addAll(findRequestsExamples(openApi, pathObject.getPut().getRequestBody()));
 				if(requests.size() > 0) {
 					apiExamples.getRequestExamples().put("PUT", requests);
-					setRequestParameters(openApi, requests, pathObject.getPut().getParameters());
+					buildRequestParameters(openApi, requests, pathObject.getPut().getParameters());
 				}
 			}
 			if (pathObject.getPatch() != null) {
@@ -106,7 +106,7 @@ public class OpenApiValidator {
 				requests.addAll(findRequestsExamples(openApi, pathObject.getPatch().getRequestBody()));
 				if(requests.size() > 0) {
 					apiExamples.getRequestExamples().put("PATCH", requests);
-					setRequestParameters(openApi, requests, pathObject.getPatch().getParameters());
+					buildRequestParameters(openApi, requests, pathObject.getPatch().getParameters());
 				}
 			}
 			if (pathObject.getDelete() != null) {
@@ -121,7 +121,7 @@ public class OpenApiValidator {
 				requests.addAll(findRequestsExamples(openApi, pathObject.getDelete().getRequestBody()));
 				if(requests.size() > 0) {
 					apiExamples.getRequestExamples().put("DELETE", requests);
-					setRequestParameters(openApi, requests, pathObject.getDelete().getParameters());
+					buildRequestParameters(openApi, requests, pathObject.getDelete().getParameters());
 				}
 			}
 			openAPIExamples.add(apiExamples);
@@ -129,7 +129,7 @@ public class OpenApiValidator {
 		return openAPIExamples;
 	}
 
-	private static void setRequestParameters(final OpenAPI openApi, final List<RequestExample> requests, final List<Parameter> parameters) {
+	private static void buildRequestParameters(final OpenAPI openApi, final List<RequestExample> requests, final List<Parameter> parameters) {
 		final Map<String, String> pathParameters = new HashMap<String, String>();
 		final Map<String, String> queryParameters = new HashMap<String, String>();
 		final Map<String, String> requestHeaders = new HashMap<String, String>();
