@@ -234,7 +234,10 @@ public class OpenApiValidator {
 	private static Map<String, String> extractExamples(Content content, String componentName, Components components) {
 		final Map<String, String> examples = new HashMap<>();
 		if (content != null) {
-			final MediaType mediaType = content.get(APPLICATION_JSON);
+			MediaType mediaType = content.entrySet().stream() //
+					.filter(map -> map.getKey().contains(APPLICATION_JSON)) //
+					.map(Map.Entry::getValue).findFirst() //
+					.orElse(null);
 			if (mediaType != null) {
 				if (mediaType.getExample() != null) {
 					logger.debug("Adding the example found on component name {}", componentName);
@@ -315,7 +318,7 @@ public class OpenApiValidator {
 		if (parseResult == null || parseResult.getOpenAPI() == null
 				|| (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty())) {
 			if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
-				logger.error("Following issues were found when loading the OpenAPI Spec", parseResult.getMessages());
+				logger.error("Following issues were found when loading the OpenAPI Spec: {}", parseResult.getMessages());
 			}
 			throw new IllegalArgumentException(
 					"Unable to load API spec from provided URL: " + oasPath + " " + parseResult);
@@ -341,7 +344,7 @@ public class OpenApiValidator {
 		if (parseResult == null || parseResult.getOpenAPI() == null
 				|| (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty())) {
 			if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
-				logger.error("Following issues were found when loading the OpenAPI Spec", parseResult.getMessages());
+				logger.error("Following issues were found when loading the OpenAPI Spec: {}", parseResult.getMessages());
 			}
 			throw new IllegalArgumentException(
 					"Unable to load API spec from provided URL: " + oasContent + " " + parseResult);

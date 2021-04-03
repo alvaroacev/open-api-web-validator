@@ -2,7 +2,6 @@ package oas.api.validator.tools;
 
 import static com.atlassian.oai.validator.schema.SchemaValidator.ADDITIONAL_PROPERTIES_KEY;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
