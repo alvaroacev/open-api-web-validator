@@ -72,16 +72,16 @@ public class ValidateReqResp {
 						.append(exampleKey).append(" ").append(endpoint.getPath()).append(", ").append(value.size()).append(" response examples found");
 				logger.debug("On path {} and HTTP method {}, {} response examples found", endpoint.getPath(),
 						exampleKey, value.size());
-				value.forEach(reqExample -> {
+				value.forEach(responseExample -> {
 					logger.info("Validate example response with verb {}, endpoint: {}, status: {},  name: {}",
-							exampleKey, endpoint.getPath(), reqExample.getStatusCode(), reqExample.getName());
+							exampleKey, endpoint.getPath(), responseExample.getStatusCode(), responseExample.getName());
 					final ValidationReport validationReport = validateResponse(openApiInteractionValidator,
-							getVerbFromString(exampleKey), endpoint.getPath(), new HashMap<String, String>(),
-							new Integer(reqExample.getStatusCode()).toString(), reqExample.getPayload());
+							getVerbFromString(exampleKey), endpoint.getPath(), responseExample.getHeaderParameters(),
+							new Integer(responseExample.getStatusCode()).toString(), responseExample.getPayload());
 					if (validationReport.hasErrors()) {
 						final String report = SimpleValidationReportFormat.getInstance().apply(validationReport);
 
-						b.append('\n').append("Example: ").append(reqExample.getName()).append('\n').append(report);
+						b.append('\n').append("Example: ").append(responseExample.getName()).append('\n').append(report);
 						logger.error("{}\n", report);
 					}
 				});

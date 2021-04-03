@@ -96,5 +96,23 @@ class ValidateReqRespTest {
 		assertTrue(validateExamples.contains(
 				"No issue found when validating the example requests and responses for OpenAPI Specification"));
 	}
+	
+	@Test
+	public void testRequiredResponseHeaderFail() {
+		final String apiContent = ResourceLoader
+				.getResourceAsString("openapi-specs/petstore-required-resonse-header.yaml");
+		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
+		assertTrue(validateExamples.contains(
+				"[ERROR][RESPONSE][GET /pets] Header 'x-next' is expected on path '/pets'"));
+	}
+	
+	@Test
+	public void testRequiredResponseHeaderPass() {
+		final String apiContent = ResourceLoader
+				.getResourceAsString("openapi-specs/petstore-required-resonse-header-present.yaml");
+		final String validateExamples = ValidateReqResp.validateExamples(apiContent);
+		assertTrue(validateExamples.contains(
+				"No issue found when validating the example requests and responses for OpenAPI Specification"));
+	}
 
 }

@@ -172,6 +172,7 @@ public class OpenApiValidator {
 
 	private static List<ResponseExample> findResponseExamples(OpenAPI openApi, String statusCode, ApiResponse response) {
 		final List<ResponseExample> responses = new ArrayList<>();
+		final Map<String, String> headerParameters = new HashMap<String, String>();
 		final Integer status = buildStatusCode(statusCode);
 		if (status != null) {
 			if (response.get$ref() != null) {
@@ -188,6 +189,20 @@ public class OpenApiValidator {
 								.forEach((keyE, valueE) -> {
 									responses.add(new ResponseExample(keyE, status, valueE));
 								});
+			}
+			if (!responses.isEmpty()) {
+				if (response.getHeaders() != null) {
+					response.getHeaders().forEach((headerKey, headerValue) -> {
+						if (headerValue.getRequired() != null && headerValue.getRequired() == true) {
+							if (headerValue.getExample() != null) {
+								headerParameters.put(headerKey, headerValue.getExample().toString());
+							}
+						}
+					});
+					responses.forEach(resp -> {
+						resp.getHeaderParameters().putAll(headerParameters);
+					});
+				}
 			}
 		}
 		return responses;
@@ -299,6 +314,9 @@ public class OpenApiValidator {
 		final SwaggerParseResult parseResult = new OpenAPIParser().readLocation(oasPath, new ArrayList<AuthorizationValue>(), new ParseOptions());
 		if (parseResult == null || parseResult.getOpenAPI() == null
 				|| (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty())) {
+			if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
+				logger.error("Following issues were found when loading the OpenAPI Spec", parseResult.getMessages());
+			}
 			throw new IllegalArgumentException(
 					"Unable to load API spec from provided URL: " + oasPath + " " + parseResult);
 		}
@@ -322,6 +340,9 @@ public class OpenApiValidator {
 		final SwaggerParseResult parseResult = new OpenAPIParser().readContents(oasContent, new ArrayList<AuthorizationValue>(), new ParseOptions());
 		if (parseResult == null || parseResult.getOpenAPI() == null
 				|| (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty())) {
+			if (parseResult.getMessages() != null && !parseResult.getMessages().isEmpty()) {
+				logger.error("Following issues were found when loading the OpenAPI Spec", parseResult.getMessages());
+			}
 			throw new IllegalArgumentException(
 					"Unable to load API spec from provided URL: " + oasContent + " " + parseResult);
 		}
