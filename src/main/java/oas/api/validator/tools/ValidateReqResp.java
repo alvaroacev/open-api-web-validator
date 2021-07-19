@@ -223,9 +223,10 @@ public class ValidateReqResp {
      */
     private static Request buildRequest(final Request.Method verb, final String path, final Map<String, String> pathParameters, final Map<String, String> queryParameters, Map<String, String> requestHeaders, String requestBody) {
         final SimpleRequest.Builder builder;
-		String resultPath = pathParameters.isEmpty() ? path
-				: pathParameters.entrySet().stream().map(e -> path.replace("{" + e.getKey() + "}", e.getValue()))
-						.collect(Collectors.joining());
+		String resultPath = path;
+		for (Map.Entry<String, String> entry : pathParameters.entrySet()) {
+			resultPath = resultPath.replace("{" + entry.getKey() + "}", entry.getValue());
+		}
 
         switch (verb) {
             case POST:
