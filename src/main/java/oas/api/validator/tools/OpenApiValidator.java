@@ -97,7 +97,7 @@ public class OpenApiValidator {
 			if (pathObject.getPatch() != null) {
 				logger.debug("Found definition of PATCH on path: {}", path);
 				final List<ResponseExample> responses = new ArrayList<>();
-				pathObject.getPut().getResponses().forEach((keyR, valueR) -> {
+				pathObject.getPatch().getResponses().forEach((keyR, valueR) -> {
 					responses.addAll(findResponseExamples(openApi, keyR, valueR));
 				});
 				apiExamples.getResponseExamples().put("PATCH", responses);
